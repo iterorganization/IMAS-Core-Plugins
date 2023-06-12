@@ -1,7 +1,9 @@
 include ../Makefile.common
 
+sources sources_install sources_uninstall install uninstall clean-src:
+
 ifneq ("yes","$(strip $(IMAS_CPP))")
-all clean:
+all clean clean-src:
 	$(warning "Ignoring plugin compilation (IMAS_CPP=no).")
 else
 
