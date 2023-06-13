@@ -7,6 +7,7 @@ all clean clean-src:
 	$(warning "Ignoring plugin compilation (IMAS_CPP=no).")
 else
 
+ifeq ("yes","$(strip $(IMAS_PLUGINS))")
 DBGFLAGS= -g
 DBGFLAGS+= -DDEBUG -DBOOST_ALL_DYN_LINK
 NOT_SUPPORTED_COMPILER=
@@ -77,4 +78,5 @@ clean:
 unsupported_compiler:
 	@echo Makefile does not support $(CC) compiler \(try CC=gcc or icc\).
 	exit 1
+endif
 endif
