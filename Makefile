@@ -1,5 +1,10 @@
 include ../Makefile.common
 
+ifeq (,$(UAL_BUILD))
+UAL_BUILD=../
+$(warning UAL_BUILD variable unset, probably not running 'make ual_test' from the Installer. Assuming UAL_BUILD=$(UAL_BUILD).)
+endif
+
 sources sources_install sources_uninstall install uninstall clean-src:
 
 ifneq ("yes","$(strip $(IMAS_PLUGINS))")
