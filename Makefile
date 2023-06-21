@@ -2,12 +2,11 @@ include ../Makefile.common
 
 sources sources_install sources_uninstall install uninstall clean-src:
 
-ifneq ("yes","$(strip $(IMAS_CPP))")
+ifneq ("yes","$(strip $(IMAS_PLUGINS))")
 all clean clean-src:
 	$(warning "Ignoring plugin compilation (IMAS_CPP=no).")
 else
 
-ifeq ("yes","$(strip $(IMAS_PLUGINS))")
 DBGFLAGS= -g
 DBGFLAGS+= -DDEBUG -DBOOST_ALL_DYN_LINK
 NOT_SUPPORTED_COMPILER=
@@ -78,5 +77,4 @@ clean:
 unsupported_compiler:
 	@echo Makefile does not support $(CC) compiler \(try CC=gcc or icc\).
 	exit 1
-endif
 endif
