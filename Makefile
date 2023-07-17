@@ -7,9 +7,9 @@ endif
 
 sources sources_install sources_uninstall install uninstall clean-src:
 
-ifneq ("TRUE","$(strip $(AL_PLUGINS_ENABLED))")
+ifneq ("TRUE","$(strip $(IMAS_AL_ENABLE_PLUGINS))")
 all clean clean-src:
-	$(warning "Ignoring plugin compilation (AL_PLUGINS_ENABLED=FALSE).")
+	$(warning "Ignoring plugin compilation (IMAS_AL_ENABLE_PLUGINS=FALSE).")
 else
 
 DBGFLAGS= -g

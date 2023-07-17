@@ -2,9 +2,9 @@ AL5 prerelease
 
 The plugins framework is disabled by default in the AL5 prerelease. It's an experimental feature which can be tested by users who are interested.
 
-To enable the plugins framework, set the global environment variable 'AL_PLUGINS_ENABLED':
+To enable the plugins framework, set the global environment variable 'IMAS_AL_ENABLE_PLUGINS':
 
-export AL_PLUGINS_ENABLED=TRUE
+export IMAS_AL_ENABLE_PLUGINS=TRUE
 
 We can distinguish 2 categories of plugins, the Access Layer core plugins and the user plugins.
 
@@ -15,7 +15,7 @@ User plugins are (optional) plugins which can be bound manually to the Access La
 
 A. GENERAL REMARKS
 
-In order to compile and try these plugins examples, you need to set the global variables UAL_BUILD and AL_PLUGINS.
+In order to compile and try these plugins examples, you need to set the global variables UAL_BUILD and IMAS_AL_PLUGINS.
 
 1. Compiling plugins, creating plugins shared libraries
 
@@ -39,11 +39,11 @@ mkdir $HOME/access_layer_plugins
 Move all the shared library .so files built in step 1 in this directory.
 
 
-3. In order to use the plugins shared libraries (.so files), you need to set the AL_PLUGINS global variable. This variable is used by the Access Layer library to find the available plugins shared libraries.
+3. In order to use the plugins shared libraries (.so files), you need to set the IMAS_AL_PLUGINS global variable. This variable is used by the Access Layer library to find the available plugins shared libraries.
 
-AL_PLUGINS is the directory created in step 2 and containing the plugins .so shared libraries built in step 1. For example:
+IMAS_AL_PLUGINS is the directory created in step 2 and containing the plugins .so shared libraries built in step 1. For example:
 
-export AL_PLUGINS=$HOME/access_layer_plugins
+export IMAS_AL_PLUGINS=$HOME/access_layer_plugins
 
 
 4. Testing plugins using Fortran programs:
