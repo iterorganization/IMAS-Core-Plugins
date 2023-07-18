@@ -98,7 +98,7 @@ void NBC_plugin::begin_global_action(int pulseCtx, const char* dataobjectname, c
         this->occurrence = 0;
     }
     
-    //IDSDef_file_path = "/ZONE_TRAVAIL/LF218007/installer/src/3.37.0/ual/feature/IMAS_AL_PLUGINS_architecture/xml/IDSDef.xml";
+    //IDSDef_file_path = "/ZONE_TRAVAIL/LF218007/installer/src/3.37.0/ual/feature/al_plugins_architecture/xml/IDSDef.xml";
     if (IDSDef_file_path.empty()) 
         throw UALPluginException("Parameter 'IDSDef_file_path' nod defined for nbc_plugin.");
     
