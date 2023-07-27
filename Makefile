@@ -5,12 +5,7 @@ UAL_BUILD=../
 $(warning UAL_BUILD variable unset, probably not running 'make ual_test' from the Installer. Assuming UAL_BUILD=$(UAL_BUILD).)
 endif
 
-sources sources_install sources_uninstall install uninstall clean-src:
-
-ifneq ("TRUE","$(strip $(IMAS_AL_ENABLE_PLUGINS))")
-all clean clean-src:
-	$(warning "Ignoring plugin compilation (IMAS_AL_ENABLE_PLUGINS=FALSE).")
-else
+all sources sources_install sources_uninstall install uninstall clean clean-src:
 
 DBGFLAGS= -g
 DBGFLAGS+= -DDEBUG -DBOOST_ALL_DYN_LINK
@@ -82,4 +77,3 @@ clean:
 unsupported_compiler:
 	@echo Makefile does not support $(CC) compiler \(try CC=gcc or icc\).
 	exit 1
-endif
