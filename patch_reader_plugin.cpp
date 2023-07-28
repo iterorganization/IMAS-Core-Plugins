@@ -38,7 +38,7 @@ void PatchReaderPlugin::setParameter(const char* parameter_name, int datatype, i
 int PatchReaderPlugin::read_data(int ctx, const char* fieldPath, const char* timeBasePath, 
                 void **data, int datatype, int dim, int *size) {
     if (dim == 2) { //in this example, we are handling only 2D data
-        ual_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size); //reading data from the backend
+        al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size); //reading data from the backend
         double *p = (double*) *data;
         for (int j = 0; j < size[1]; j++)
           for (int i = 0; i< size[0]; i++)

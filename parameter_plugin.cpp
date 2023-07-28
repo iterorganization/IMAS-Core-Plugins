@@ -26,10 +26,10 @@ plugin::OPERATION ParameterPlugin::node_operation(const std::string &path) {
 
 void ParameterPlugin::setParameter(const char* parameter_name, int datatype, int dim, int *size, void *data) {
    if (dim > 2) 
-       throw UALPluginException("Parameter dimension (>2) not supported!");
+       throw ALPluginException("Parameter dimension (>2) not supported!");
    if (dim == 2) {
        if (size[0] > 1 && size[1] > 1)
-            throw UALPluginException("Matrix are not supported!");
+            throw ALPluginException("Matrix are not supported!");
        else if (size[0] == 1 && size[1] == 1)
             dim = 0;
        else

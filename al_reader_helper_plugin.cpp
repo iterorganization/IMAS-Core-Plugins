@@ -14,15 +14,15 @@ AL_reader_helper_plugin::~AL_reader_helper_plugin()
 }
 
 std::string AL_reader_helper_plugin::getName() {
-    throw UALPluginException("Name of the plugin should be defined in user code!");
+    throw ALPluginException("Name of the plugin should be defined in user code!");
 }
 
 std::string AL_reader_helper_plugin::getVersion() {
-    throw UALPluginException("Version of the plugin should be defined in user code!");
+    throw ALPluginException("Version of the plugin should be defined in user code!");
 }
 
 plugin::OPERATION AL_reader_helper_plugin::node_operation(const std::string &path) {
-    throw UALPluginException("plugin node_operation(path) should be defined in user code!"); 
+    throw ALPluginException("plugin node_operation(path) should be defined in user code!"); 
 }
 
 std::string AL_reader_helper_plugin::getCommit() {

@@ -15,11 +15,11 @@ User plugins are (optional) plugins which can be bound manually to the Access La
 
 A. GENERAL REMARKS
 
-In order to compile and try these plugins examples, you need to set the global variables UAL_BUILD and IMAS_AL_PLUGINS.
+In order to compile and try these plugins examples, you need to set the global variables AL_BUILD and IMAS_AL_PLUGINS.
 
 1. Compiling plugins, creating plugins shared libraries
 
-As usual, UAL_BUILD is the location of the Access Layer main directory which contains the 'ccpinterface' directory. 
+As usual, AL_BUILD is the location of the Access Layer main directory which contains the 'ccpinterface' directory. 
 
 To compile all the examples:
 

@@ -74,16 +74,16 @@ This is an implementation of the read_data function for the Debug_plugin class.
 
 The function takes in a ctx integer representing the LL context of the data read, fieldPath and timeBasePath character arrays representing the path to the data field and the time base path, respectively. It also takes in a void **data pointer to a pointer to the data to be read, an integer datatype representing the type of data being read, an integer dim representing the number of dimensions of the data, and an array of integers size representing the size of the data in each dimension.
 
-The function first calls the ual_plugin_read_data function to read the data from the given field path and time base path. If the datatype is CHAR_DATA, it logs the field path and the string data to the debug log using the LOG_DEBUG macro.
+The function first calls the al_plugin_read_data function to read the data from the given field path and time base path. If the datatype is CHAR_DATA, it logs the field path and the string data to the debug log using the LOG_DEBUG macro.
 
 Finally, the function returns 1, indicating that the read_data operation has modified the data pointer.
 */
 
 int Debug_plugin::read_data(int ctx, const char* fieldPath, const char* timeBasePath, 
                 void **data, int datatype, int dim, int *size) {
-	al_status_t status = ual_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size);
+	al_status_t status = al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size);
 	if (status.code != 0) {
-            throw UALPluginException("Error calling ual_plugin_read_data in debug plugin.");
+            throw ALPluginException("Error calling al_plugin_read_data in debug plugin.");
         }
 	if (datatype == CHAR_DATA) {
 		LOG_DEBUG << "reading data for field path= " << fieldPath;

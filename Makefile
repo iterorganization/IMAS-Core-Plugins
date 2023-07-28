@@ -1,8 +1,8 @@
 include ../Makefile.common
 
-ifeq (,$(UAL_BUILD))
-UAL_BUILD=../
-$(warning UAL_BUILD variable unset, probably not running 'make ual_test' from the Installer. Assuming UAL_BUILD=$(UAL_BUILD).)
+ifeq (,$(AL_BUILD))
+AL_BUILD=../
+$(warning AL_BUILD variable unset, probably not running 'make al_test' from the Installer. Assuming AL_BUILD=$(AL_BUILD).)
 endif
 
 all sources sources_install sources_uninstall install uninstall clean clean-src:
@@ -23,11 +23,11 @@ else
 NOT_SUPPORTED_COMPILER=unsupported_compiler
 endif
 INCDIR_PKGCONFIG=`pkg-config blitz --cflags`
-INCDIR= -I$(UAL_BUILD)/lowlevel
-LIBS= -lal `pkg-config blitz --libs` -L$(BOOST_ROOT)/lib -L$(UAL_BUILD)/lowlevel -lboost_log -lboost_thread
+INCDIR= -I$(AL_BUILD)/lowlevel
+LIBS= -lal `pkg-config blitz --libs` -L$(BOOST_ROOT)/lib -L$(AL_BUILD)/lowlevel -lboost_log -lboost_thread
 
-INCDIR_HLI=$(INCDIR) -I$(UAL_BUILD)/cppinterface/src $(INCDIR_PKGCONFIG)
-LIBS_HLI=-L$(UAL_BUILD)/cppinterface/lib $(LIBS) -lal-cpp
+INCDIR_HLI=$(INCDIR) -I$(AL_BUILD)/cppinterface/src $(INCDIR_PKGCONFIG)
+LIBS_HLI=-L$(AL_BUILD)/cppinterface/lib $(LIBS) -lal-cpp
 
 OBJ_DEBUG_PLUGIN = debug_plugin.o simple_logger.o
 OBJ_NBC_PLUGIN = nbc_plugin.o 

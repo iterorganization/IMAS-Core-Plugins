@@ -98,9 +98,8 @@ void NBC_plugin::begin_global_action(int pulseCtx, const char* dataobjectname, c
         this->occurrence = 0;
     }
     
-    //IDSDef_file_path = "/ZONE_TRAVAIL/LF218007/installer/src/3.37.0/ual/feature/al_plugins_architecture/xml/IDSDef.xml";
     if (IDSDef_file_path.empty()) 
-        throw UALPluginException("Parameter 'IDSDef_file_path' nod defined for nbc_plugin.");
+        throw ALPluginException("Parameter 'IDSDef_file_path' nod defined for nbc_plugin.");
     
     //Creating/parsing the doc object (Data Dictionary)
     if (doc == NULL)
@@ -113,9 +112,9 @@ void NBC_plugin::begin_global_action(int pulseCtx, const char* dataobjectname, c
    if (data_dictionary_version.empty()) {
        char *data;
        int size;
-       al_status_t status = ual_plugin_read_data(opCtx, "ids_properties/version_put/data_dictionary", "", (void**) &data, CHAR_DATA, 1, &size);
+       al_status_t status = al_plugin_read_data(opCtx, "ids_properties/version_put/data_dictionary", "", (void**) &data, CHAR_DATA, 1, &size);
        if (status.code != 0)
-           throw UALPluginException(status.message);
+           throw ALPluginException(status.message);
        if (data != NULL) 
             data_dictionary_version = std::string(data);
        //LOG_DEBUG << "data_dictionary_version=" << data_dictionary_version;
@@ -185,10 +184,10 @@ int NBC_plugin::read_data(int ctx, const char* fieldPath, const char* timeBasePa
       //nothing to do, we assume that 'time' will never be renamed...
    }
    
-   al_status_t status = ual_plugin_read_data(ctx, patchedPath.c_str(), patchedTimedBasePath.c_str(), data, datatype, dim, size);
+   al_status_t status = al_plugin_read_data(ctx, patchedPath.c_str(), patchedTimedBasePath.c_str(), data, datatype, dim, size);
    
    if (status.code < 0)
-       throw UALPluginException(status.message);
+       throw ALPluginException(status.message);
        
    if (homogeneous_time == -1 && patchedPath == "ids_properties/homogeneous_time") {
        int **h = (int**) data;
@@ -226,10 +225,10 @@ void NBC_plugin::write_data(int ctx, const char* fieldPath, const char* timeBase
     al_status_t status;
     if (Lowlevel::data_has_non_zero_shape(datatype, data, dim, size)) {
             //LOG_DEBUG << "write_data::full patched path=" <<  getFullPath(lle.context) + "/" + std::string(patchedPath);
-			status = ual_plugin_write_data(ctx, patchedPath.c_str(), patchedTimedBasePath.c_str(), data, datatype, dim, size);
+			status = al_plugin_write_data(ctx, patchedPath.c_str(), patchedTimedBasePath.c_str(), data, datatype, dim, size);
     }
     if (status.code < 0)
-        throw UALPluginException(status.message);
+        throw ALPluginException(status.message);
 }
 
 
@@ -243,7 +242,7 @@ void NBC_plugin::end_action(int ctx) {
           while(true) {
               
               if (i > MAX_LOOPS) {
-                  throw UALPluginException("NBC plugin: unexpected error!");
+                  throw ALPluginException("NBC plugin: unexpected error!");
               }
              char* value = evaluateXpathExpression("./@data_type");
             
@@ -449,7 +448,7 @@ void NBC_plugin::create_xml_doc(const char* ddFile) {
     if (doc == NULL) {
         char message[200];
         sprintf(message, "unable to parse Data Dictionnary %s. Check if the file exists.", ddFile);
-        throw UALPluginException(message);
+        throw ALPluginException(message);
     }
     create_xpath_context(); 
 }
@@ -461,7 +460,7 @@ void NBC_plugin::create_xpath_context() {
     if (xpathCtx == NULL) {
         char message[200];
         sprintf(message, "unexpected error: unable to create new XPath context");
-        throw UALPluginException(message);
+        throw ALPluginException(message);
     }
 }
 
@@ -512,7 +511,7 @@ char* NBC_plugin::evaluateXpathExpression(const char* xpathKey)
         char message[200];
         sprintf(message, "unable to evaluate xpath expression %s", xpathKey);
         free(xPathExpr);
-        throw UALPluginException(message);
+        throw ALPluginException(message);
     }
 
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -565,7 +564,7 @@ void NBC_plugin::setCurrentNodePtr(const char* xpathKey)
         char message[200];
         sprintf(message, "unable to evaluate xpath expression %s", xpathKey);
         free(xPathExpr);
-        throw UALPluginException(message);
+        throw ALPluginException(message);
     }
 
     xmlNodeSetPtr nodes = xpathObj->nodesetval;
@@ -579,7 +578,7 @@ void NBC_plugin::setCurrentNodePtr(const char* xpathKey)
         sprintf(message, "unable to set the current node %s", xpathKey);
         xmlXPathFreeObject(xpathObj);
         free(xPathExpr);
-        throw UALPluginException(message);
+        throw ALPluginException(message);
     }
     xmlXPathFreeObject(xpathObj);
     free(xPathExpr);

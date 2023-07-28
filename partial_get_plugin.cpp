@@ -60,7 +60,7 @@ void PartialGetPlugin::begin_global_action(int pulseCtx, const char* dataobjectn
 }
 
 void PartialGetPlugin::begin_slice_action(int pulseCtx, const char* dataobjectname, int mode, double time, int interp, int opCtx) {
-    throw UALPluginException("PartialGetPlugin: slice operation not supported", LOG);
+    throw ALPluginException("PartialGetPlugin: slice operation not supported", LOG);
 }
 
 void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) {
@@ -82,7 +82,7 @@ int PartialGetPlugin::read_data(int ctx, const char* fieldPath, const char* time
 
 
 void PartialGetPlugin::write_data(int ctx, const char* fieldPath, const char* timeBasePath, void *data, int datatype, int dim, int *size) {
-	throw UALPluginException("PartialGetPlugin: write_data not supported", LOG);
+	throw ALPluginException("PartialGetPlugin: write_data not supported", LOG);
 }
 
 void PartialGetPlugin::end_action(int ctx) {}

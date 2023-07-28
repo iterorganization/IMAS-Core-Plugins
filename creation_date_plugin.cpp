@@ -107,7 +107,7 @@ The function takes several parameters, including an integer "ctx", which is a ha
 
 The function prints a message indicating that the "Creation_date" plugin is patching the creation date. It then uses the standard library function "std::time" to obtain the current system time and local time, and formats it using the standard library function "std::put_time" to create a string representing the current date in the format of "YYYY-MM-DD". This string is stored in a std::ostringstream object called "oss" and then converted to a C-style string using the "str()" function, and then to a void pointer using the "c_str()" function.
 
-Finally, the function creates an array of sizes for the data being written, with a single element representing the length of the string. It then calls the "ual_plugin_write_data" function to write the data to the specified field, passing in the current context, the field path, the timebase path, the void pointer to the data, the data type, the number of dimensions, and the array of sizes. After writing the data, the function prints a message indicating that the patching is complete.
+Finally, the function creates an array of sizes for the data being written, with a single element representing the length of the string. It then calls the "al_plugin_write_data" function to write the data to the specified field, passing in the current context, the field path, the timebase path, the void pointer to the data, the data type, the number of dimensions, and the array of sizes. After writing the data, the function prints a message indicating that the patching is complete.
 */
 void Creation_date_plugin::write_data(int ctx, const char* fieldPath, const char* timeBasePath, void *data, int datatype, int dim, int *size) {
     printf("Patching creation_date from the creation_date plugin... \n");
@@ -118,7 +118,7 @@ void Creation_date_plugin::write_data(int ctx, const char* fieldPath, const char
     auto text = oss.str(); 
     void* ptrData = (void *) (text.c_str());
     int arrayOfSizes[1] = {(int)text.size()};
-    ual_plugin_write_data(ctx, fieldPath, timeBasePath, ptrData, CHAR_DATA, 1, arrayOfSizes);
+    al_plugin_write_data(ctx, fieldPath, timeBasePath, ptrData, CHAR_DATA, 1, arrayOfSizes);
     printf("End of patching.\n");
 }
 
