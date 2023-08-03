@@ -5,7 +5,7 @@ AL_BUILD=../
 $(warning AL_BUILD variable unset, probably not running 'make al_test' from the Installer. Assuming AL_BUILD=$(AL_BUILD).)
 endif
 
-all sources sources_install sources_uninstall install uninstall clean clean-src:
+all sources sources_install sources_uninstall install uninstall clean clean-src test:
 
 DBGFLAGS= -g
 DBGFLAGS+= -DDEBUG -DBOOST_ALL_DYN_LINK
