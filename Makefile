@@ -5,7 +5,7 @@ AL_BUILD=../
 $(warning AL_BUILD variable unset, probably not running 'make al_test' from the Installer. Assuming AL_BUILD=$(AL_BUILD).)
 endif
 
-all sources sources_install sources_uninstall install uninstall clean clean-src test:
+# all sources sources_install install sources_uninstall uninstall clean clean-src test:
 
 DBGFLAGS= -g
 DBGFLAGS+= -DDEBUG -DBOOST_ALL_DYN_LINK
@@ -33,15 +33,15 @@ OBJ_DEBUG_PLUGIN = debug_plugin.o simple_logger.o
 OBJ_NBC_PLUGIN = nbc_plugin.o 
 OBJ_CREATION_DATE_PLUGIN = creation_date_plugin.o
 OBJ_PARAMETER_PLUGIN = parameter_plugin.o al_reader_helper_plugin.o
-OBJ_PARTIAL_GET_PLUGIN = partial_get_plugin.o simple_logger.o
+OBJ_PARTIAL_GET_PLUGIN = partial_get_plugin.o simple_logger.o 
 OBJ_PATCH_READER_PLUGIN = patch_reader_plugin.o simple_logger.o al_reader_helper_plugin.o
 
 PLUGINS = debug_plugin creation_date_plugin parameter_plugin partial_get_plugin patch_reader_plugin
 EXE = $(PLUGINS)
 
-
 all: $(NOT_SUPPORTED_COMPILER) $(EXE)
 
+install: all
 debug_plugin: $(OBJ_DEBUG_PLUGIN)
 	@echo Linking $^
 	$(CXX) $(LDFLAGS) -o $@.so $^ $(LIBDIR) $(LIBS)
