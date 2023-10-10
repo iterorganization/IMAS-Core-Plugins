@@ -83,7 +83,7 @@ void NBC_plugin::setParameter(const char* parameter_name, int datatype, int dim,
 
 void NBC_plugin::begin_global_action(int pulseCtx, const char* dataobjectname, const char* datapath, int mode, int opCtx) {
     
-     //Initializing plugin with IDS name, shot and occurrence
+     //Initializing plugin with IDS name, pulse and occurrence
     if (nbc_debug)
         LOG_DEBUG << "NBC_plugin::begin_global_action, opCtx= " << opCtx;
         

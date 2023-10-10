@@ -73,9 +73,9 @@ Using C++, the following command:
 
 ./test_debug_plugin imas:hdf5?path=$WEST_PULSE_FILES/54914/0/
 
-will execute the 'debug_plugin' for shot 54914 whose the 'master.h5' file is located in directory $WEST_PULSE_FILES/54914/0. 
+will execute the 'debug_plugin' for pulse 54914 whose the 'master.h5' file is located in directory $WEST_PULSE_FILES/54914/0.
 
-This will call the 'debug' plugin (using the get() operation)  for shot 54914, run 0, at the specified path. 
+This will call the 'debug' plugin (using the get() operation)  for pulse 54914, run 0, at the specified path.
 
 All examples below use HDF5, so the specified path should be a directory containing the 'master.h5' file. 
 
@@ -95,9 +95,9 @@ Using C++, the following command:
 
 ./test_patch_reader_plugin imas:hdf5?path=$MY_PULSE_FILES/55000/0
 
-will execute the 'test_patch_reader_plugin' for shot 55000 whose the 'master.h5' file is located in directory $MY_PULSE_FILES/55000/0.
+will execute the 'test_patch_reader_plugin' for pulse 55000 whose the 'master.h5' file is located in directory $MY_PULSE_FILES/55000/0.
 
-This will call the 'patch_reader' plugin, creating the pulse file for shot 55000 at the specified path.
+This will call the 'patch_reader' plugin, creating the pulse file for pulse 55000 at the specified path.
 
 Or using Fortran:
 
@@ -116,9 +116,9 @@ Using C++, the following command:
 
 ./test_partial_get_plugin imas:hdf5?path=$WEST_PULSE_FILES/54914/0/
 
-will execute the 'test_partial_get_plugin' for shot 55000 whose the 'master.h5' file is located in directory $WEST_PULSE_FILES/54914/0.
+will execute the 'test_partial_get_plugin' for pulse 55000 whose the 'master.h5' file is located in directory $WEST_PULSE_FILES/54914/0.
 
-This will call the 'partial_get' plugin, reading the pulse file for shot 54914 at the specified path (folder containing a 'master.h5' file).
+This will call the 'partial_get' plugin, reading the pulse file for pulse 54914 at the specified path (folder containing a 'master.h5' file).
 
 Or using Fortran:
 
@@ -137,7 +137,7 @@ Using C++, execute the following command:
 
 ./test_creation_date_plugin imas:hdf5?path=$MY_PULSE_FILES/55000/0
 
-This will call the 'creation_date' plugin, writing the pulse file for shot 55000 at the specified path.
+This will call the 'creation_date' plugin, writing the pulse file for pulse 55000 at the specified path.
 The field 'ids_properties/creation_date' will be patched for the magnetics IDS, occurrence 0. 
 
 Or using Fortran:
