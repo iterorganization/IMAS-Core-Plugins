@@ -14,13 +14,6 @@ class Debug_plugin: public access_layer_plugin
 {
 
   private:
-    int pulseCtx;
-    int ctx;
-    std::string dataobjectname;
-    int occurrence;
-    int mode;
-    double time;
-    int interp;
 
   public:
     Debug_plugin();
