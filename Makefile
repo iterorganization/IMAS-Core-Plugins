@@ -23,7 +23,7 @@ else
 NOT_SUPPORTED_COMPILER=unsupported_compiler
 endif
 INCDIR_PKGCONFIG=`pkg-config blitz --cflags`
-INCDIR= -I$(AL_BUILD)/lowlevel
+INCDIR= -I$(AL_BUILD)/lowlevel -I$(BOOST_ROOT)/include
 LIBS= -lal `pkg-config blitz --libs` -L$(BOOST_ROOT)/lib -L$(AL_BUILD)/lowlevel -lboost_log -lboost_thread
 
 INCDIR_HLI=$(INCDIR) -I$(AL_BUILD)/cppinterface/src $(INCDIR_PKGCONFIG)
