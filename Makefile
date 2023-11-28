@@ -35,9 +35,8 @@ OBJ_CREATION_DATE_PLUGIN = creation_date_plugin.o
 OBJ_PARAMETER_PLUGIN = parameter_plugin.o al_reader_helper_plugin.o
 OBJ_PARTIAL_GET_PLUGIN = partial_get_plugin.o simple_logger.o 
 OBJ_PATCH_READER_PLUGIN = patch_reader_plugin.o simple_logger.o al_reader_helper_plugin.o
-OBJ_CAMERA_PLUGIN = camera_plugin.o
 
-PLUGINS = debug_plugin creation_date_plugin parameter_plugin partial_get_plugin patch_reader_plugin camera_plugin
+PLUGINS = debug_plugin creation_date_plugin parameter_plugin partial_get_plugin patch_reader_plugin
 EXE = $(PLUGINS)
 
 all: $(NOT_SUPPORTED_COMPILER) $(EXE)
@@ -65,10 +64,6 @@ partial_get_plugin: $(OBJ_PARTIAL_GET_PLUGIN)
 	$(CXX) $(LDFLAGS) -o $@.so $^ $(LIBDIR) $(LIBS)
 
 patch_reader_plugin: $(OBJ_PATCH_READER_PLUGIN)
-	@echo Linking $^
-	$(CXX) $(LDFLAGS) -o $@.so $^ $(LIBDIR) $(LIBS)
-
-camera_plugin: $(OBJ_CAMERA_PLUGIN)
 	@echo Linking $^
 	$(CXX) $(LDFLAGS) -o $@.so $^ $(LIBDIR) $(LIBS)
 
