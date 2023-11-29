@@ -28,6 +28,10 @@ std::string NBC_plugin::getName() {
     return "nbc";
 }
 
+std::string NBC_plugin::getDescription() {
+    return "";
+}
+
 std::string NBC_plugin::getCommit() {
     return "d92bb2f30384bc618574508b56e9542d00f0e97a";
 }
@@ -50,15 +54,23 @@ plugin::OPERATION NBC_plugin::node_operation(const std::string &path) {
 std::string NBC_plugin::getReadbackName(const std::string &path, int* index) {
     return "";
 }
+
+std::string NBC_plugin::getReadbackDescription(const std::string &path) {
+    return "";
+}
+
 std::string NBC_plugin::getReadbackCommit(const std::string &path) {
     return "";
 }
+
 std::string NBC_plugin::getReadbackVersion(const std::string &path) {
     return "";
 }
+
 std::string NBC_plugin::getReadbackRepository(const std::string &path) {
     return "";
 }
+
 std::string NBC_plugin::getReadbackParameters(const std::string &path) {
     return "";
 }

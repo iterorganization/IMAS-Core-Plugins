@@ -17,6 +17,10 @@ std::string Debug_plugin::getName() {
     return "debug";
 }
 
+std::string Debug_plugin::getDescription() {
+    return "";
+}
+
 std::string Debug_plugin::getCommit() {
     return "d92bb2f30384bc618574508b56e9542d00f0e97a";
 }
@@ -34,15 +38,23 @@ std::string Debug_plugin::getParameters() {
 std::string Debug_plugin::getReadbackName(const std::string &path, int* index) {
     return "";
 }
+
+std::string Debug_plugin::getReadbackDescription(const std::string &path) {
+    return "";
+}
+
 std::string Debug_plugin::getReadbackCommit(const std::string &path) {
     return "";
 }
+
 std::string Debug_plugin::getReadbackVersion(const std::string &path) {
     return "";
 }
+
 std::string Debug_plugin::getReadbackRepository(const std::string &path) {
     return "";
 }
+
 std::string Debug_plugin::getReadbackParameters(const std::string &path) {
     return "";
 }

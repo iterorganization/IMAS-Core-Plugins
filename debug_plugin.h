@@ -20,12 +20,14 @@ class Debug_plugin: public access_layer_plugin
     ~Debug_plugin();
     
      std::string getName() override;
+     std::string getDescription() override;
      std::string getCommit() override;
      std::string getVersion() override;
      std::string getRepository() override;
      std::string getParameters() override;
      plugin::OPERATION node_operation(const std::string &path) override;
      std::string getReadbackName(const std::string &path, int* index) override;
+     std::string getReadbackDescription(const std::string &path) override;
      std::string getReadbackCommit(const std::string &path) override;
      std::string getReadbackVersion(const std::string &path) override;
      std::string getReadbackRepository(const std::string &path) override;

@@ -15,6 +15,10 @@ std::string PatchReaderPlugin::getName() {
     return "nbc";
 }
 
+std::string PatchReaderPlugin::getDescription() {
+    return "";
+}
+
 std::string PatchReaderPlugin::getVersion() {
     return "1.0.0";
 }

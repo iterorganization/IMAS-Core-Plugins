@@ -14,7 +14,11 @@ PartialGetPlugin::~PartialGetPlugin()
 }
 
 std::string PartialGetPlugin::getName() {
-    return "nbc";
+    return "partial_get";
+}
+
+std::string PartialGetPlugin::getDescription() {
+    return "";
 }
 
 std::string PartialGetPlugin::getCommit() {
@@ -39,6 +43,11 @@ plugin::OPERATION PartialGetPlugin::node_operation(const std::string &path) {
 std::string PartialGetPlugin::getReadbackName(const std::string &path, int* index) {
     return "";
 }
+
+std::string PartialGetPlugin::getReadbackDescription(const std::string &path) {
+    return "";
+}
+
 std::string PartialGetPlugin::getReadbackCommit(const std::string &path) {
     return "";
 }

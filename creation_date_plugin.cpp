@@ -30,6 +30,10 @@ std::string Creation_date_plugin::getName() {
     return "creation_date";
 }
 
+std::string Creation_date_plugin::getDescription() {
+    return "";
+}
+
 std::string Creation_date_plugin::getCommit() {
     return "8f2e7cd64daf9e35a6e6c5850dd80fc198f11d86";
 }
@@ -61,21 +65,33 @@ The getReadbackParameters() function returns the parameters to pass to the readb
 std::string Creation_date_plugin::getReadbackName(const std::string &path, int* index) {
        return "";
 }
+
+std::string Creation_date_plugin::getReadbackDescription(const std::string &path) {
+       return "";
+}
+
 std::string Creation_date_plugin::getReadbackCommit(const std::string &path) {
     if (path.rfind("creation_date"))
        return "d92bb2f30384bc618574508b56e9542d00f0e97a";
+    return "";
 }
+
 std::string Creation_date_plugin::getReadbackVersion(const std::string &path) {
     if (path.rfind("creation_date"))
        return "1.1.0";
+    return "";
 }
+
 std::string Creation_date_plugin::getReadbackRepository(const std::string &path) {
     if (path.rfind("creation_date"))
        return "ssh://git@git.iter.org/imas/access-layer-plugins.git";
+    return "";
 }
+
 std::string Creation_date_plugin::getReadbackParameters(const std::string &path) {
     if (path.rfind("creation_date"))
        return "readback plugin parameters";
+    return "";
 }
 
 plugin::OPERATION Creation_date_plugin::node_operation(const std::string &path) {
@@ -97,6 +113,7 @@ void Creation_date_plugin::begin_arraystruct_action(int ctx, int *aosctx, const 
 
 int Creation_date_plugin::read_data(int ctx, const char* fieldPath, const char* timeBasePath, 
                 void **data, int datatype, int dim, int *size) {
+    return 0;
 }
 
 

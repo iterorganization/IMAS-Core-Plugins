@@ -14,6 +14,7 @@ class PatchReaderPlugin: public AL_reader_helper_plugin
     ~PatchReaderPlugin();
 
      std::string getName() override;
+     std::string getDescription() override;
      std::string getVersion() override;
      plugin::OPERATION node_operation(const std::string &path) override;
 

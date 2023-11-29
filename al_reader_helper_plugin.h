@@ -21,6 +21,7 @@ class AL_reader_helper_plugin: public access_layer_plugin
     ~AL_reader_helper_plugin();	
 
     std::string getName() override;
+    std::string getDescription() override;
     std::string getCommit() override;
     std::string getVersion() override;
     std::string getRepository() override;
@@ -28,6 +29,7 @@ class AL_reader_helper_plugin: public access_layer_plugin
     plugin::OPERATION node_operation(const std::string &path) override;
 
     std::string getReadbackName(const std::string &path, int* index) override;
+    std::string getReadbackDescription(const std::string &path) override;
     std::string getReadbackCommit(const std::string &path) override;
     std::string getReadbackVersion(const std::string &path) override;
     std::string getReadbackRepository(const std::string &path) override;

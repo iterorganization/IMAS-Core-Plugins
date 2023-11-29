@@ -17,6 +17,10 @@ std::string AL_reader_helper_plugin::getName() {
     throw ALPluginException("Name of the plugin should be defined in user code!");
 }
 
+std::string AL_reader_helper_plugin::getDescription() {
+    throw ALPluginException("Description of the plugin should be defined in user code!");
+}
+
 std::string AL_reader_helper_plugin::getVersion() {
     throw ALPluginException("Version of the plugin should be defined in user code!");
 }
@@ -38,6 +42,9 @@ std::string AL_reader_helper_plugin::getParameters() {
 
 std::string AL_reader_helper_plugin::getReadbackName(const std::string &path, int* index) {
        return "";
+}
+std::string AL_reader_helper_plugin::getReadbackDescription(const std::string &path) {
+   return "";
 }
 std::string AL_reader_helper_plugin::getReadbackCommit(const std::string &path) {
    return "";

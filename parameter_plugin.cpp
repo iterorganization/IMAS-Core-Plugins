@@ -15,6 +15,10 @@ std::string ParameterPlugin::getName() {
     return "parameter";
 }
 
+std::string ParameterPlugin::getDescription() {
+    return "";
+}
+
 std::string ParameterPlugin::getVersion() {
     return "1.0.0";
 }
