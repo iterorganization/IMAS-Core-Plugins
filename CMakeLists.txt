@@ -1,10 +1,14 @@
 # CMake build configuration for Access Layer plugins
 cmake_minimum_required( VERSION 3.16 )
 
+if( AL_DOCS_ONLY )
+  return()
+endif()
+
 # Assume that al-lowlevel and the `al` target already exist
 # TODO: fix standalone building when there is a use case for it
 if( NOT TARGET al )
-    message( FATAL_ERROR "Target `al` does not exist. Please ensure that al-lowlevel is added before al-plugins." )
+  message( FATAL_ERROR "Target `al` does not exist. Please ensure that al-lowlevel is added before al-plugins." )
 endif()
 
 
