@@ -72,6 +72,10 @@ void PartialGetPlugin::begin_slice_action(int pulseCtx, const char* dataobjectna
     throw ALPluginException("PartialGetPlugin: slice operation not supported", LOG);
 }
 
+void PartialGetPlugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx) {
+    throw ALPluginException("PartialGetPlugin: time range operation not supported", LOG);
+}
+
 void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) {
     
   LLenv lle = Lowlevel::getLLenv(ctx);

@@ -17,7 +17,7 @@ project( al-plugins )
 
 # Dependencies
 find_package( LibXml2 REQUIRED )
-set( Boost_USE_MULTITHREADED FALSE )
+#set( Boost_USE_MULTITHREADED FALSE )
 find_package( Boost REQUIRED COMPONENTS log )
 
 # CMake build options

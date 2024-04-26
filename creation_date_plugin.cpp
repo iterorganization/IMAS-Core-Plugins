@@ -104,6 +104,9 @@ void Creation_date_plugin::begin_global_action(int pulseCtx, const char* dataobj
 void Creation_date_plugin::begin_slice_action(int pulseCtx, const char* dataobjectname, int mode, double time, int interp, int opCtx) {
 }
 
+void Creation_date_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx)  {
+}
+
 void Creation_date_plugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) {
      LLenv lle = Lowlevel::getLLenv(ctx);
      ArraystructContext* actx = lle.create(fieldPath, timeBasePath);
