@@ -5,10 +5,10 @@ if( AL_DOCS_ONLY )
   return()
 endif()
 
-# Assume that al-lowlevel and the `al` target already exist
+# Assume that al-core and the `al` target already exist
 # TODO: fix standalone building when there is a use case for it
 if( NOT TARGET al )
-  message( FATAL_ERROR "Target `al` does not exist. Please ensure that al-lowlevel is added before al-plugins." )
+  message( FATAL_ERROR "Target `al` does not exist. Please ensure that al-core is added before al-plugins." )
 endif()
 
 
@@ -17,7 +17,6 @@ project( al-plugins )
 
 # Dependencies
 find_package( LibXml2 REQUIRED )
-#set( Boost_USE_MULTITHREADED FALSE )
 find_package( Boost REQUIRED COMPONENTS log )
 
 # CMake build options
