@@ -25,6 +25,7 @@ NBC_plugin::~NBC_plugin()
 }
 
 std::string NBC_plugin::getName() {
+    toto
     return "nbc";
 }
 
@@ -139,7 +140,7 @@ void NBC_plugin::begin_slice_action(int pulseCtx, const char* dataobjectname, in
     this->begin_global_action(pulseCtx, dataobjectname, mode, opCtx); //same plugin initialization than begin_global_action, so we call it
 }
 
-void NBC_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx) {
+void NBC_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, std::vector<double> dtime, int interp, int opCtx) {
 }
 
 void NBC_plugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) {

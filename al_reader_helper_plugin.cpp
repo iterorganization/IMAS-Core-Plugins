@@ -85,7 +85,7 @@ void AL_reader_helper_plugin::begin_slice_action(int pulseCtx, const char* datao
     begin_global_action(pulseCtx, dataobjectname, "", mode, opCtx);
 }
 
-void AL_reader_helper_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx) {
+void AL_reader_helper_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, std::vector<double> dtime, int interp, int opCtx) {
     this->tmin = time;
     this->tmax = tmax;
     this->dtime = dtime;

@@ -13,6 +13,23 @@
 class PartialGetPlugin: public access_layer_plugin
 {
 
+  private:
+    int nb_queries;
+    std::vector<std::string> queries;
+    std::map<std::string, std::vector<int>> aos_indices; //key = aos path, value = list of requested indices 
+    std::map<std::string, std::string> aos_queries; //key = aos full path, value = AOS query
+    std::map<std::string, int> aos_queries_index; //key = aos full path, value = index of query in the 'queries' vector
+    bool display_only_debug_read_requests;
+
+    std::string setAOSQuery(ArraystructContext *actx, const std:: string &query, const std:: string &aos_full_path, int query_index);
+    void buildRequestedAOSIndices(const std::string &aos_name, const std::string &aos_query, const std::string &aos_full_path, int query_index);
+    std::string getAOSName(const char *fieldPath);
+    void getAOSIndices(Context * ctx, std::vector < int >&indices, int *timedAOS_index);
+    void getAOSPosition(ArraystructContext *actx, int *position);
+    void getAOSQuery(ArraystructContext *actx, const std::string &query, std::string &aos_query);
+    void getAOSPaths(ArraystructContext *c,  const std::string &aos_name, std::string &rpath, std::string &full_path);
+    bool requested_indices(ArraystructContext *arctx);
+
   public:
     PartialGetPlugin();
     ~PartialGetPlugin();
@@ -36,7 +53,7 @@ class PartialGetPlugin: public access_layer_plugin
     void begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) override;
     void begin_global_action(int pulseCtx, const char* dataobjectname, const char* datapath, int mode, int opCtx) override;
     void begin_slice_action(int pulseCtx, const char* dataobjectname, int mode, double time, int interp, int opCtx) override;
-    void begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx) override;
+    void begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, std::vector<double> dtime, int interp, int opCtx) override;
     void end_action(int ctx);
     int read_data(int ctx, const char* fieldPath, const char* timeBasePath, void **data, int datatype, int dim, int *size) override;
     void write_data(int ctx, const char* fieldPath, const char* timeBasePath, void *data, int datatype, int dim, int *size) override;

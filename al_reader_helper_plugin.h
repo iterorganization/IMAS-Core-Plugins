@@ -16,7 +16,7 @@ class AL_reader_helper_plugin: public access_layer_plugin
     int interp;
     double tmin;
     double tmax;
-    double dtime;
+    std::vector<double> dtime;
 
 
   public:
@@ -43,7 +43,7 @@ class AL_reader_helper_plugin: public access_layer_plugin
     void begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) override;
     void begin_global_action(int pulseCtx, const char* dataobjectname, const char* datapath, int mode, int opCtx) override;
     void begin_slice_action(int pulseCtx, const char* dataobjectname, int mode, double time, int interp, int opCtx) override;
-    void begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx) override;
+    void begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, std::vector<double> dtime, int interp, int opCtx) override;
     void end_action(int ctx) override;
     int read_data(int ctx, const char* fieldPath, const char* timeBasePath, void **data, int datatype, int dim, int *size) override;
     void write_data(int ctx, const char* fieldPath, const char* timeBasePath, void *data, int datatype, int dim, int *size) override;

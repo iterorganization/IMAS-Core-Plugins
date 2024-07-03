@@ -72,7 +72,7 @@ void Debug_plugin::begin_global_action(int pulseCtx, const char* dataobjectname,
 void Debug_plugin::begin_slice_action(int pulseCtx, const char* dataobjectname, int mode, double time, int interp, int opCtx) {
 }
 
-void Debug_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, double dtime, int interp, int opCtx)  {
+void Debug_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, std::vector<double> dtime, int interp, int opCtx)  {
 }
 
 void Debug_plugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) {
@@ -98,6 +98,7 @@ int Debug_plugin::read_data(int ctx, const char* fieldPath, const char* timeBase
                 void **data, int datatype, int dim, int *size) {
 	al_status_t status = al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size);
 	if (status.code != 0) {
+            printf("status.code = %d\n", status.code);
             throw ALPluginException("Error calling al_plugin_read_data in debug plugin.");
         }
 	if (datatype == CHAR_DATA) {
