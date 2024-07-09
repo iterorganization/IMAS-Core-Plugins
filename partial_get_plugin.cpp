@@ -168,7 +168,7 @@ void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char
         std::string aos_query = setAOSQuery(actx, query, aos_full_path, i); //Stores the AOS query in the 'aos_queries' map 
         if (!display_only_debug_read_requests && aos_query != "")
             LOG_DEBUG << "buildRequestedAOSIndices for " << aos_query;
-        buildRequestedAOSIndices(field, aos_query, aos_full_path, i); //builds the requested AOS indices by the user for the given query
+        buildRequestedAOSIndices(field, aos_query, aos_full_path, i); //builds the requested AOS indices for the given query
         if (aos_query == field + "(-1)") {
             *arraySize = 0;
         }
@@ -214,14 +214,14 @@ void PartialGetPlugin::getAOSQuery(ArraystructContext *actx, const std::string &
     getAOSPosition(actx, &position); //position = 0 means first AOS, position = 1 means second nested AOS, and so on
     //printf("position=%d\n", position) ;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-    boost::char_separator<char> sep{"/"};
+    boost::char_separator<char> sep{"/"}; //separator between AOS in the query (e.g query "a(2:3:1)/b(3:7:1)" where a and b are AOSs)
     tokenizer tok{query, sep};
     std::vector<std::string> tokens;
     for (const auto &t : tok) {
         tokens.push_back(t);
         //std::cout << t << '\n';
     }
-    if (tokens.size() > position) {
+    if (tokens.size() > position) { //is there a query at the position of the current AOS?
         aos_query = tokens[position];
     
         if (aos_query == actx->getPath()) {
@@ -229,8 +229,8 @@ void PartialGetPlugin::getAOSQuery(ArraystructContext *actx, const std::string &
         }
         else if (aos_query == actx->getPath() + "(:)") {
         }
-        else if (aos_query == actx->getPath() + "(-1)") { //TODO
-        }
+        /*else if (aos_query == actx->getPath() + "(-1)") { //TODO
+        }*/
         else {
             //printf("testing aos_query=%s for path=%s\n", aos_query.c_str(), actx->getPath().c_str()) ;
             std::string replacement = "";
@@ -240,26 +240,27 @@ void PartialGetPlugin::getAOSQuery(ArraystructContext *actx, const std::string &
             //printf("testing aos_path=%s for query=%s\n", aos_path.c_str(), query.c_str()) ;
             if (actx->getPath() != aos_path) {
                 LOG_DEBUG << "returning empty string since paths differ";
-                aos_query = "";
+                aos_query = ""; //query has no effect for the current AOS path
             }
         }
     }
     else {
         //LOG_DEBUG << "returning empty string since position < tokens.size()";
-        aos_query = "";
+        aos_query = ""; //query has no effect for the current AOS path
     }
 }
 
 void PartialGetPlugin::buildRequestedAOSIndices(const std::string &aos_name, const std::string &aos_query, const std::string &aos_full_path, int query_index) {
   
   //LOG_DEBUG << "getting request for " << aos_full_path << "; query_index=" << query_index << "; aos_query=" << aos_query;
-  if (aos_indices.find(aos_full_path) != aos_indices.end()) //these indices have been already found
+  if (aos_indices.find(aos_full_path) != aos_indices.end()) //requested indices for this AOS path have been already set for this query index
     return;
 
   if (aos_query == aos_name + "(-1)") 
     return;
 
-  if (aos_query == "" || (aos_query == aos_name + "(:)")) {
+  //if (aos_query == "" || (aos_query == aos_name + "(:)")) {
+  if (aos_query == aos_name + "(:)") {
         if (!display_only_debug_read_requests)
             LOG_DEBUG << "full request for " << aos_full_path << "; query_index=" << query_index << "; aos_query=" << aos_query;
         std::vector<int> requested_indices{-1}; //storing -1 means that all indices of this AOS are requested
@@ -401,6 +402,9 @@ bool PartialGetPlugin::requested_indices(ArraystructContext *arctx) {
     std::string fullDataObjectName;
     std::string aos_name;
     ArraystructContext *p = arctx;
+
+    if (aos_indices.empty())
+        return true; //no restriction found so all data are returned
 
     while (p != NULL) {
         //we extract the exact name of the AOS
