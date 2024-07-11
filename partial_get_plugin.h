@@ -14,15 +14,22 @@ class PartialGetPlugin: public access_layer_plugin
 {
 
   private:
-    int nb_queries;
-    std::vector<std::string> queries;
+    std::vector<std::string> query_includes;
+    std::vector<std::string> query_excludes;
     std::map<std::string, std::vector<int>> aos_indices; //key = aos path, value = list of requested indices 
+    std::map<std::string, std::vector<int>> aos_excludes_indices; //key = aos path, value = list of requested indices for 'excludes' queries
     std::map<std::string, std::string> aos_queries; //key = aos full path, value = AOS query
     std::map<std::string, int> aos_queries_index; //key = aos full path, value = index of query in the 'queries' vector
+    std::map<std::string, std::string> aos_excludes_queries; //key = aos full path, value = AOS query
+    std::map<std::string, int> aos_excludes_queries_index; //key = aos full path, value = index of query in the 'queries' vector    
     bool display_only_debug_read_requests;
 
-    std::string setAOSQuery(ArraystructContext *actx, const std:: string &query, const std:: string &aos_full_path, int query_index);
-    void buildRequestedAOSIndices(const std::string &aos_name, const std::string &aos_query, const std::string &aos_full_path, int query_index);
+    std::string setAOSQuery(ArraystructContext *actx, const std:: string &query, const std:: string &aos_full_path, int query_index, 
+    std::map<std::string, std::string> &aos_queries_, std::map<std::string, int> &aos_queries_index_);
+    void buildRequestedAOSIndices(const std::string &aos_name, const std::string &aos_query, const std::string &aos_full_path, 
+      int query_index, std::map<std::string, std::vector<int>> &aos_indices, bool includes);
+    bool isRequested(const std::vector<int> &requested_indices, int index);
+    void getIndices(const std::string &aos_name, const std::string &aos_query, std::vector<int> &indices);
     std::string getAOSName(const char *fieldPath);
     void getAOSIndices(Context * ctx, std::vector < int >&indices, int *timedAOS_index);
     void getAOSPosition(ArraystructContext *actx, int *position);
