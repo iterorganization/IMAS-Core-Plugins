@@ -185,6 +185,12 @@ void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char
     if (!display_only_debug_read_requests)
         LOG_DEBUG << "fieldPath= " << fieldPath << "; aos_full_path= " << aos_full_path.c_str() << "; rpath= " << rpath.c_str();
 
+    //if 'includes' parameter is empty, all fields are included by default
+    if (query_includes.size() == 0) {
+        std::vector<int> requested_indices{-1}; //storing -1 means that all indices of this AOS are requested
+        aos_indices[aos_full_path] = requested_indices;
+    }
+    
     for (int i = 0; i < query_excludes.size(); i++)
     {
         const std::string &query = query_excludes[i];
@@ -203,11 +209,6 @@ void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char
             LOG_DEBUG << "buildRequestedAOSIndices for 'includes' query: " << aos_query;
 
         buildRequestedAOSIndices(field, aos_query, aos_full_path, i, aos_indices, true); //builds the requested AOS indices for the 'includes' query
-
-        /*if (aos_query == field + "(-1)")
-        {
-            *arraySize = 0;
-        }*/
     }
 
     if (*arraySize == 0)
@@ -261,6 +262,7 @@ std::string PartialGetPlugin::setAOSQuery(ArraystructContext *actx, const std::s
 void PartialGetPlugin::getAOSQuery(ArraystructContext *actx, const std::string &query, std::string &aos_query)
 {
     int position = -1;
+    //Getting the position of the current AOS given by the actx pointer
     getAOSPosition(actx, &position); //position = 0 means first AOS, position = 1 means second nested AOS, and so on
     //printf("position=%d\n", position) ;
     typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
@@ -292,7 +294,7 @@ void PartialGetPlugin::getAOSQuery(ArraystructContext *actx, const std::string &
             std::string p = "\\((\\d+):?(\\d+)?:?(\\d+)?\\)";
             std::regex pattern(p);
             std::string aos_path = std::regex_replace(aos_query, pattern, replacement);
-            //printf("testing aos_path=%s for query=%s\n", aos_path.c_str(), query.c_str()) ;
+            //printf("testing aos_path=%s for query=%s\n", aos_path.c_str(), aos_query.c_str()) ;
             if (actx->getPath() != aos_path)
             {
                 LOG_DEBUG << "returning empty string since paths differ";
@@ -318,17 +320,20 @@ void PartialGetPlugin::buildRequestedAOSIndices(const std::string &aos_name, con
     /*if (aos_query == aos_name + "(-1)") 
     return;*/
     //in case of an empty 'includes' query, we initialize aos_indices to -1, meaning we take all data by default
-    if ((aos_query == "" && includes) || (aos_query == aos_name + "(:)"))
+    /*if ((aos_query == "" && includes) || (aos_query == aos_name + "(:)"))
     {
         if (!display_only_debug_read_requests)
             LOG_DEBUG << "full request for " << aos_full_path << "; query_index=" << query_index << "; aos_query=" << aos_query;
         std::vector<int> requested_indices{-1}; //storing -1 means that all indices of this AOS are requested
         aos_indices_[aos_full_path] = requested_indices;
         return;
-    }
+    }*/
+    if (aos_query == "")
+        return;
 
     if (!display_only_debug_read_requests)
         LOG_DEBUG << "partial request for " << aos_full_path << "; query_index=" << query_index << "; aos_query=" << aos_query;
+
 
     std::vector<int> requested_indices;
     getIndices(aos_name, aos_query, requested_indices);
@@ -339,6 +344,7 @@ void PartialGetPlugin::buildRequestedAOSIndices(const std::string &aos_name, con
     }
 }
 
+//Extract the AOS indices from the query on AOSs
 void PartialGetPlugin::getIndices(const std::string &aos_name, const std::string &aos_query, std::vector<int> &indices)
 {
 
@@ -515,11 +521,24 @@ bool PartialGetPlugin::requested_indices(ArraystructContext *arctx)
             }
             else
             {
+                /*for (const auto& entry : aos_excludes_indices) {
+                std::cout << "Key: " << entry.first << std::endl;
+                std::cout << "Values: ";
+                for (int value : entry.second) {
+                    std::cout << value << " ";
+                }
+                std::cout << std::endl;
+                }*/
+    
+                //printf("aos_excludes_indices.size()=%d\n", aos_excludes_indices.size());
+                //printf("0PartialGetPlugin::looking at excludes for AOS full path (excludes)=%s\n", aos_full_path.c_str(), p->getIndex());
                 if (got_excludes != aos_excludes_indices.end())
-                {
+                {   
+                    //printf("1PartialGetPlugin::excluding AOS full path (excludes)=%s for index=%d\n", aos_full_path.c_str(), p->getIndex());
                     auto &requested_excludes_indices = got_excludes->second;
                     if (isRequested(requested_excludes_indices, p->getIndex())) {//the AOS element index belongs to the excluded ones, so the data is ignored 
                         LOG_DEBUG << "PartialGetPlugin::excluding AOS full path (excludes)=" << aos_full_path.c_str() << ", index=" << p->getIndex();
+                        //printf("2PartialGetPlugin::excluding AOS full path (excludes)=%s for index=%d\n", aos_full_path.c_str(), p->getIndex());
                         return false;
                     }
                     else
@@ -551,9 +570,7 @@ bool PartialGetPlugin::isRequested(const std::vector<int> &requested_indices, in
     int inc = requested_indices[2];
     bool requested = (index - min) % inc == 0 && index < max && index >= min;
     LOG_DEBUG << "index = " << index << " ; min=" << min << " ; max=" << max << " ; inc=" << inc << "; requested = " << requested;
-    if (!requested)
-        return false;
-    return true;
+    return requested;
 }
 
 //Returns the list of indices of the arrays of structures requested during a read_data() operation

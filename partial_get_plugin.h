@@ -16,7 +16,7 @@ class PartialGetPlugin: public access_layer_plugin
   private:
     std::vector<std::string> query_includes;
     std::vector<std::string> query_excludes;
-    std::map<std::string, std::vector<int>> aos_indices; //key = aos path, value = list of requested indices 
+    std::map<std::string, std::vector<int>> aos_indices; //key = aos path, value = list of requested indices for 'includes' queries
     std::map<std::string, std::vector<int>> aos_excludes_indices; //key = aos path, value = list of requested indices for 'excludes' queries
     std::map<std::string, std::string> aos_queries; //key = aos full path, value = AOS query
     std::map<std::string, int> aos_queries_index; //key = aos full path, value = index of query in the 'queries' vector
