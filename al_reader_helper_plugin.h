@@ -1,9 +1,9 @@
 #ifndef AL_READER_HELPER_PLUGIN_H
 #define AL_READER_HELPER_PLUGIN_H 1
 
-#include "access_layer_plugin.h"
+#include "extended_access_layer_plugin.h"
 
-class AL_reader_helper_plugin: public access_layer_plugin
+class AL_reader_helper_plugin: public extended_access_layer_plugin
 {
 
   protected:

@@ -7,10 +7,10 @@
 #include <unordered_map>
 #include <iostream>
 
-#include "access_layer_plugin.h"
+#include "extended_access_layer_plugin.h"
 
 
-class Debug_plugin: public access_layer_plugin
+class Debug_plugin: public extended_access_layer_plugin
 {
 
   private:
@@ -42,11 +42,11 @@ class Debug_plugin: public access_layer_plugin
      void write_data(int ctx, const char* fieldPath, const char* timeBasePath, void *data, int datatype, int dim, int *size) override;
 };
 
-extern "C" access_layer_plugin* create() {
+extern "C" extended_access_layer_plugin* create() {
   return new Debug_plugin;
 }
 
-extern "C" void destroy (access_layer_plugin* al_plugin) {
+extern "C" void destroy (extended_access_layer_plugin* al_plugin) {
   delete al_plugin;
 }
 

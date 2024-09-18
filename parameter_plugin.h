@@ -2,7 +2,7 @@
 #define PARAMETER_PLUGIN_H 1
 
 #include "al_reader_helper_plugin.h"
-#include "access_layer_plugin.h"
+#include "extended_access_layer_plugin.h"
 
 class ParameterPlugin: public AL_reader_helper_plugin
 { 
@@ -22,10 +22,10 @@ class ParameterPlugin: public AL_reader_helper_plugin
 
 };
 
-extern "C" access_layer_plugin* create() {
+extern "C" extended_access_layer_plugin* create() {
   return new ParameterPlugin;
 }
-extern "C" void destroy (access_layer_plugin* al_plugin) {
+extern "C" void destroy (extended_access_layer_plugin* al_plugin) {
   delete al_plugin;
 }
 #endif
