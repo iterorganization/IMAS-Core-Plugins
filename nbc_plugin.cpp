@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <ctime>
 #include <sstream>
+#include "simple_logger.h"
 
 #define MAX_LOOPS 30
 
@@ -25,7 +26,6 @@ NBC_plugin::~NBC_plugin()
 }
 
 std::string NBC_plugin::getName() {
-    toto
     return "nbc";
 }
 
@@ -89,17 +89,16 @@ void NBC_plugin::setParameter(const char* parameter_name, int datatype, int dim,
              show_nbc_fields = true;
          }
          else if (directive == DEBUG_OPTION){
+             //std::clog.clear();
              nbc_debug = true;
          }
      }
 }
 
 void NBC_plugin::begin_global_action(int pulseCtx, const char* dataobjectname, const char* datapath, int mode, int opCtx) {
-    
      //Initializing plugin with IDS name, pulse and occurrence
     if (nbc_debug)
         LOG_DEBUG << "NBC_plugin::begin_global_action, opCtx= " << opCtx;
-        
     std::size_t found = std::string(dataobjectname).find("/");
     if (found != std::string::npos) {
         this->dataobjectname = std::string(dataobjectname).substr(0, found);
@@ -137,16 +136,20 @@ void NBC_plugin::begin_global_action(int pulseCtx, const char* dataobjectname, c
 
 void NBC_plugin::begin_slice_action(int pulseCtx, const char* dataobjectname, int mode, double time, int interp, int opCtx) {
     //LOG_DEBUG << "begin_slice_action called for opCtx=" << opCtx; 
-    this->begin_global_action(pulseCtx, dataobjectname, mode, opCtx); //same plugin initialization than begin_global_action, so we call it
+    this->begin_global_action(pulseCtx, dataobjectname, "", mode, opCtx); //same plugin initialization than begin_global_action, so we call it
 }
 
 void NBC_plugin::begin_timerange_action(int pulseCtx, const char* dataobjectname, int mode, double tmin, double tmax, std::vector<double> dtime, int interp, int opCtx) {
+    this->begin_global_action(pulseCtx, dataobjectname, "", mode, opCtx);
 }
 
 void NBC_plugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fieldPath, const char* timeBasePath, int *arraySize) {
    
    LLenv lle = Lowlevel::getLLenv(ctx);
    if (nbc_debug) {
+       //LLenv lle_aos1 = Lowlevel::getLLenv(*aosctx);
+       //ArraystructContext *actx = dynamic_cast<ArraystructContext *> (lle_aos1.context);
+       //LOG_DEBUG << "AOS path =" << actx->getPath();
        LOG_DEBUG << "arraystruct path =" <<  getFullPath(lle.context) << ", fieldPath=" << fieldPath << ", aosctx=" << *aosctx << ", size=" << *arraySize; 
    }
    std::string patchedPath;
@@ -176,7 +179,7 @@ void NBC_plugin::begin_arraystruct_action(int ctx, int *aosctx, const char* fiel
     if (nbc_debug) {
       LOG_DEBUG << "arraystruct path =" << getFullPath(lle.context) << ", patchedPath=" << patchedPath <<  ", is_patched=" <<  is_patched << ", aosctx=" << *aosctx << ", size=" << *arraySize; 
    }
-   
+   LOG_DEBUG << "setting XML current node to field: " << fieldPath;
    setXMLCurrentNode(fieldPath); //Setting the current node of the Xpath context
 }
 
@@ -217,7 +220,7 @@ int NBC_plugin::read_data(int ctx, const char* fieldPath, const char* timeBasePa
 }
 
 void NBC_plugin::write_data(int ctx, const char* fieldPath, const char* timeBasePath, void *data, int datatype, int dim, int *size) {
-    LLenv lle = Lowlevel::getLLenv(ctx);
+    /*LLenv lle = Lowlevel::getLLenv(ctx);
     if (nbc_debug) {
         LOG_DEBUG << "datatype = " << datatype;
         LOG_DEBUG << "write_data::full path (non patched)=" <<  getFullPath(lle.context) + "/" + std::string(fieldPath);
@@ -244,7 +247,8 @@ void NBC_plugin::write_data(int ctx, const char* fieldPath, const char* timeBase
 			status = al_plugin_write_data(ctx, patchedPath.c_str(), patchedTimedBasePath.c_str(), data, datatype, dim, size);
     }
     if (status.code < 0)
-        throw ALPluginException(status.message);
+        throw ALPluginException(status.message);*/
+    throw ALPluginException("Writing data using NBC plugin is not supported.");
 }
 
 
@@ -294,6 +298,7 @@ void NBC_plugin::setXMLCurrentNode(const char* fieldPath) {
      buildXPathExpression(xpathKey, NULL);
      setCurrentNodePtr(xpath_request);
      xpathCtx->node = cur; //the XPath context current node has to be updated
+     //LOG_DEBUG << "current node= " << xmlGetNodePath(cur);
 }
 
 bool NBC_plugin::getPatchedField(int ctx, const char* fieldPath, std::string &patchedPath) {
@@ -618,4 +623,5 @@ std::string NBC_plugin::getFullPath(Context *context) {
       if (found_sep == std::string::npos) 
          path += "/0";
   }
+  return path;
 }

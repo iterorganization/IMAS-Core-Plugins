@@ -37,7 +37,7 @@ target_link_libraries( al-debug-plugin al-plugin-simple-logger al )
 # nbc plugin -- EXCLUDE_FROM_ALL: this plugin doesn't compile at the moment
 add_library( al-nbc-plugin SHARED EXCLUDE_FROM_ALL nbc_plugin.cpp )
 set_target_properties( al-nbc-plugin PROPERTIES PREFIX "" OUTPUT_NAME nbc_plugin )
-target_link_libraries( al-nbc-plugin al LibXml2::LibXml2 )
+target_link_libraries( al-nbc-plugin al-plugin-simple-logger al LibXml2::LibXml2 )
 
 # creation date plugin
 add_library( al-creation-date-plugin SHARED creation_date_plugin.cpp )
@@ -50,7 +50,7 @@ set_target_properties( al-parameter-plugin PROPERTIES PREFIX "" OUTPUT_NAME para
 target_link_libraries( al-parameter-plugin al-plugin-reader-helper al )
 
 # partial get plugin
-add_library( al-partial-get-plugin SHARED partial_get_plugin.cpp )
+add_library( al-partial-get-plugin SHARED EXCLUDE_FROM_ALL partial_get_plugin.cpp )
 set_target_properties( al-partial-get-plugin PROPERTIES PREFIX "" OUTPUT_NAME partial_get_plugin )
 target_link_libraries( al-partial-get-plugin al-plugin-simple-logger al )
 
