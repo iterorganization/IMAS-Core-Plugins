@@ -50,7 +50,7 @@ set_target_properties( al-parameter-plugin PROPERTIES PREFIX "" OUTPUT_NAME para
 target_link_libraries( al-parameter-plugin al-plugin-reader-helper al )
 
 # partial get plugin
-add_library( al-partial-get-plugin SHARED EXCLUDE_FROM_ALL partial_get_plugin.cpp )
+add_library( al-partial-get-plugin SHARED partial_get_plugin.cpp )
 set_target_properties( al-partial-get-plugin PROPERTIES PREFIX "" OUTPUT_NAME partial_get_plugin )
 target_link_libraries( al-partial-get-plugin al-plugin-simple-logger al )
 
