@@ -387,12 +387,12 @@ void PartialGetPlugin::getIndices(const std::string &aos_name, const std::string
 
         if (minIndex < 1 || maxIndex < 1) {
             char message[200];
-            snprintf(message, 200, "Min and max index should be > 1 for AOS %s. Please check the query.\n", aos_name.c_str());
+            snprintf(message, 200, "Min and max index should be >= 1 for AOS %s. Please check the query.\n", aos_name.c_str());
             throw ALPluginException(message);
         }
         if (maxIndex < minIndex) {
             char message[200];
-            snprintf(message, 200, "Max index should be >= to min index for AOS %s. Please check the query.\n", aos_name.c_str());
+            snprintf(message, 200, "Max index should be >= min index for AOS %s. Please check the query.\n", aos_name.c_str());
             throw ALPluginException(message);
         }
         int inc = std::stoi(matches[4]);
