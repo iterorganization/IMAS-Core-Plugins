@@ -5,13 +5,12 @@ StructureArray::StructureArray(string n, int s, int e, int st, bool unbounded)
 
 bool StructureArray::contains(int index) const {
     if (is_unbounded) {
-        return index >= 0; // Accept all non-negative indices
+        return index >= 0;
     }
     if (step == 0) {
-        return index == start; // Special case: step = 0, only start index is valid
+        return index == start;
     }
-    return index >= start && index <= end && 
-           (index - start) % step == 0;
+    return index >= start && index <= end && (index - start) % step == 0;
 }
 
 set<int> StructureArray::getIndices() const {
@@ -28,6 +27,26 @@ set<int> StructureArray::getIndices() const {
         }
     }
     return indices;
+}
+
+// Binary search to check if an index belongs to the range
+bool StructureArray::binary_contains(int index) const {
+    if (is_unbounded) {
+        return index >= 0;
+    }
+    if (step == 0) {
+        return index == start;
+    }
+    if (index < start || index > end) {
+        return false;
+    }
+    // Calculate the sequence length
+    int count = (end - start) / step + 1;
+    vector<int> indices(count);
+    for (int i = 0; i < count; ++i) {
+        indices[i] = start + i * step;
+    }
+    return binary_search(indices.begin(), indices.end(), index);
 }
 
 bool StructureArray::operator<(const StructureArray& other) const {
@@ -133,7 +152,6 @@ PathManager::PathManager(const vector<string>& inc, const vector<string>& exc) {
 bool PathManager::isInSet(const string& path) const {
     vector<pair<string, int>> path_elements = pathToElements(path);
     
-    // If includes is empty, all paths are included by default unless excluded
     if (includes.empty()) {
         for (const auto& exclude : excludes) {
             if (matchesQuery(path_elements, exclude.elements, false)) {
@@ -143,9 +161,7 @@ bool PathManager::isInSet(const string& path) const {
         return true;
     }
 
-    // Check each include query
     for (const auto& include : includes) {
-        // If path is shorter or equal, check for prefix match
         if (path_elements.size() <= include.elements.size()) {
             bool match = true;
             for (size_t i = 0; i < path_elements.size(); ++i) {
@@ -156,7 +172,7 @@ bool PathManager::isInSet(const string& path) const {
                     break;
                 }
                 if (query_elem.is_array) {
-                    if (!query_elem.array->contains(path_elem.second)) {
+                    if (!query_elem.array->binary_contains(path_elem.second)) {
                         match = false;
                         break;
                     }
@@ -174,7 +190,6 @@ bool PathManager::isInSet(const string& path) const {
                 return true;
             }
         }
-        // If path is longer, check if it extends a valid prefix
         else {
             bool prefix_match = true;
             for (size_t i = 0; i < include.elements.size(); ++i) {
@@ -185,7 +200,7 @@ bool PathManager::isInSet(const string& path) const {
                     break;
                 }
                 if (query_elem.is_array) {
-                    if (!query_elem.array->contains(path_elem.second)) {
+                    if (!query_elem.array->binary_contains(path_elem.second)) {
                         prefix_match = false;
                         break;
                     }
@@ -208,81 +223,134 @@ bool PathManager::isInSet(const string& path) const {
     return false;
 }
 
-bool PathManager::is_included(const string& array_name) const {
-    // If includes is empty, all arrays are included unless fully excluded
+bool PathManager::is_included(const string& array_path) const {
+    vector<pair<string, int>> path_elements = pathToElements(array_path);
+    string target_array = path_elements.back().first; // Last element is the target array
+    vector<pair<string, int>> prefix_elements(path_elements.begin(), path_elements.end() - 1);
+
+    // If includes is empty, check if the array is not fully excluded
     if (includes.empty()) {
         for (const auto& exclude : excludes) {
-            for (const auto& elem : exclude.elements) {
-                if (elem.name == array_name && elem.is_array && elem.array->is_unbounded) {
-                    return false; // Fully excluded by an unbounded exclude like t(:)
+            if (exclude.elements.back().name == target_array && exclude.elements.back().is_array) {
+                if (exclude.elements.back().array->is_unbounded) {
+                    return false;
                 }
             }
         }
-        return true; // Default inclusion unless fully excluded
+        return true;
     }
 
-    // Check each include query for the array_name at any position
+    // Check each include query
     for (const auto& include : includes) {
-        bool array_found = false;
-        string test_path;
-        
-        // Build a test path with the first valid index for each array
-        for (size_t i = 0; i < include.elements.size(); ++i) {
-            if (i > 0) test_path += "/";
-            const auto& elem = include.elements[i];
-            if (elem.is_array) {
-                int index = elem.array->is_unbounded ? 0 : 
-                           (elem.array->step == 0 ? elem.array->start : elem.array->start);
-                test_path += elem.name + "(" + to_string(index) + ")";
-            } else {
-                test_path += elem.name;
-            }
-            if (elem.name == array_name) {
-                array_found = true;
+        // Case 1: array_path is just the target array (e.g., "profiles_1d")
+        if (path_elements.size() == 1 && path_elements[0].second == -1) {
+            for (size_t i = 0; i < include.elements.size(); ++i) {
+                if (include.elements[i].name == target_array && include.elements[i].is_array) {
+                    auto indices = include.elements[i].array->getIndices();
+                    string prefix_path;
+                    for (size_t j = 0; j < i; ++j) {
+                        if (j > 0) prefix_path += "/";
+                        const auto& elem = include.elements[j];
+                        if (elem.is_array) {
+                            int index = elem.array->is_unbounded ? 0 : 
+                                       (elem.array->step == 0 ? elem.array->start : elem.array->start);
+                            prefix_path += elem.name + "(" + to_string(index) + ")";
+                        } else {
+                            prefix_path += elem.name;
+                        }
+                    }
+                    for (int index : indices) {
+                        string full_path = prefix_path.empty() ? 
+                            target_array + "(" + to_string(index) + ")" :
+                            prefix_path + "/" + target_array + "(" + to_string(index) + ")";
+                        if (isInSet(full_path)) {
+                            return true;
+                        }
+                    }
+                }
             }
         }
-
-        // If array_name is in the path, check if the test path is in E
-        if (array_found && isInSet(test_path)) {
-            return true;
-        }
-
-        // If array_name is an array in the include, check its direct inclusion
-        for (size_t i = 0; i < include.elements.size(); ++i) {
-            if (include.elements[i].name == array_name && include.elements[i].is_array) {
-                const auto& array = include.elements[i].array;
-                if (array->is_unbounded) {
-                    bool fully_excluded = false;
-                    for (const auto& exclude : excludes) {
-                        if (exclude.elements[0].name == array_name && exclude.elements[0].is_array) {
-                            if (exclude.elements[0].array->is_unbounded) {
-                                fully_excluded = true;
-                                break;
+        // Case 2: array_path ends with the target array as in include (e.g., "profiles_1d(1)/ion")
+        else if (!include.elements.empty() && include.elements.back().name == target_array) {
+            if (prefix_elements.size() <= include.elements.size() - 1) {
+                bool prefix_match = true;
+                for (size_t i = 0; i < prefix_elements.size(); ++i) {
+                    const auto& path_elem = prefix_elements[i];
+                    const auto& query_elem = include.elements[i];
+                    if (path_elem.first != query_elem.name) {
+                        prefix_match = false;
+                        break;
+                    }
+                    if (query_elem.is_array) {
+                        if (!query_elem.array->binary_contains(path_elem.second)) {
+                            prefix_match = false;
+                            break;
+                        }
+                    } else if (path_elem.second != -1) {
+                        prefix_match = false;
+                        break;
+                    }
+                }
+                if (prefix_match) {
+                    const auto& target_array_def = include.elements.back();
+                    if (target_array_def.is_array) {
+                        auto indices = target_array_def.array->getIndices();
+                        string prefix_path;
+                        for (size_t i = 0; i < prefix_elements.size(); ++i) {
+                            if (i > 0) prefix_path += "/";
+                            if (prefix_elements[i].second != -1) {
+                                prefix_path += prefix_elements[i].first + "(" + 
+                                              to_string(prefix_elements[i].second) + ")";
+                            } else {
+                                prefix_path += prefix_elements[i].first;
+                            }
+                        }
+                        for (int index : indices) {
+                            string full_path = prefix_path.empty() ? 
+                                target_array + "(" + to_string(index) + ")" :
+                                prefix_path + "/" + target_array + "(" + to_string(index) + ")";
+                            if (isInSet(full_path)) {
+                                return true;
                             }
                         }
                     }
-                    if (!fully_excluded) return true;
-                } else if (array->step == 0) {
-                    string path = array_name + "(" + to_string(array->start) + ")";
-                    if (isInSet(path)) return true;
-                } else {
-                    int test_index = array->start;
-                    string path = array_name + "(" + to_string(test_index) + ")";
-                    if (isInSet(path)) return true;
-                    bool fully_excluded = false;
-                    for (const auto& exclude : excludes) {
-                        if (exclude.elements[0].name == array_name && exclude.elements[0].is_array) {
-                            const auto& ex_array = exclude.elements[0].array;
-                            if (!ex_array->is_unbounded && 
-                                ex_array->start <= array->start && 
-                                ex_array->end >= array->end && 
-                                ex_array->step <= array->step) {
-                                fully_excluded = true;
-                                break;
-                            }
-                        }
+                    return false; // If target_array is not an array, no indices to check
+                }
+            }
+        }
+        // Case 3: target_array is not in include, check if prefix is in E only if it matches fully
+        else if (prefix_elements.size() == include.elements.size()) {
+            bool prefix_match = true;
+            for (size_t i = 0; i < prefix_elements.size(); ++i) {
+                const auto& path_elem = prefix_elements[i];
+                const auto& query_elem = include.elements[i];
+                if (path_elem.first != query_elem.name) {
+                    prefix_match = false;
+                    break;
+                }
+                if (query_elem.is_array) {
+                    if (!query_elem.array->binary_contains(path_elem.second)) {
+                        prefix_match = false;
+                        break;
                     }
-                    if (!fully_excluded) return true;
+                } else if (path_elem.second != -1) {
+                    prefix_match = false;
+                    break;
+                }
+            }
+            if (prefix_match) {
+                string prefix_path;
+                for (size_t i = 0; i < prefix_elements.size(); ++i) {
+                    if (i > 0) prefix_path += "/";
+                    if (prefix_elements[i].second != -1) {
+                        prefix_path += prefix_elements[i].first + "(" + 
+                                      to_string(prefix_elements[i].second) + ")";
+                    } else {
+                        prefix_path += prefix_elements[i].first;
+                    }
+                }
+                if (isInSet(prefix_path)) {
+                    return true;
                 }
             }
         }

@@ -1,6 +1,5 @@
-
-#ifndef PATH_MANAGER_H
-#define PATH_MANAGER_H 1
+#ifndef PATH_MANAGER_HPP
+#define PATH_MANAGER_HPP
 
 #include <iostream>
 #include <vector>
@@ -9,6 +8,7 @@
 #include <unordered_map>
 #include <sstream>
 #include <memory>
+#include <algorithm>
 
 using namespace std;
 
@@ -22,6 +22,7 @@ public:
 
     bool contains(int index) const;
     set<int> getIndices() const;
+    bool binary_contains(int index) const; // New method for binary search
     bool operator<(const StructureArray& other) const;
 };
 
@@ -59,7 +60,7 @@ private:
 public:
     PathManager(const vector<string>& inc, const vector<string>& exc);
     bool isInSet(const string& path) const;
-    bool is_included(const string& array_name) const; // New function declaration
+    bool is_included(const string& array_path) const; // Updated declaration
 };
 
 #endif // PATH_MANAGER_HPP
