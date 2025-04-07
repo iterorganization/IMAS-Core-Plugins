@@ -175,26 +175,28 @@ void PartialGetPlugin::setParameter(const char *parameter_name, int datatype, in
 
 void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char *fieldPath, const char *timeBasePath, int *arraySize)
 {
-
     // Creation of an AOS
     LLenv lle = Lowlevel::getLLenv(ctx);
     ArraystructContext *actx = lle.create(fieldPath, timeBasePath);
     *aosctx = Lowlevel::addLLenv(lle.backend, actx);
     lle.backend->beginArraystructAction(actx, arraySize);
 
+    // Initialize PathManager with predefined include and exclude queries
     PathManager manager(query_includes, query_excludes);
 
     //Checking if the AOS is included
     std::string aos_full_path;
     getAOSPaths(actx, aos_full_path, true);
-    //LOG_DEBUG <<  "aos_full_path= " << aos_full_path;
-    //LOG_DEBUG <<  "manager.is_included(aos_full_path)= " << manager.is_included(aos_full_path);
+
+    // Use PathManager to check if the full path of the array of structures (AOS) has at least one element in the set E
     bool is_included = manager.is_included(aos_full_path);
 
+    // If no elements of the AOS are included according to PathManager, set array size to 0 to exclude all elements
     if (!is_included) {
         *arraySize = 0;
         LOG_DEBUG << "PartialGetPlugin::begin_arraystruct_action, all elements excluded for AOS path=" << aos_full_path.c_str();
     }
+    // If at least one element is included, proceed with the original array size
     else {
         LOG_DEBUG << "PartialGetPlugin::begin_arraystruct_action, all elements included for AOS path=" << aos_full_path.c_str();
     }
@@ -203,9 +205,10 @@ void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char
 int PartialGetPlugin::read_data(int ctx, const char *fieldPath, const char *timeBasePath,
                                 void **data, int datatype, int dim, int *size)
 {
+    // If no include or exclude queries are defined, PathManager is bypassed and all data is returned
     if (query_includes.size() == 0 && query_excludes.size() == 0)
-    {                                                                                 // we return all data if there is no 'includes' and no 'excludes' query
-        al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size); // in case of exception, the LL will catch it
+    {                                                                                 
+        al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size); 
         return 1;
     }
 
@@ -215,14 +218,20 @@ int PartialGetPlugin::read_data(int ctx, const char *fieldPath, const char *time
     std::string full_path;
 
     getFullPath(ctx, fieldPath,  full_path);
+
+    // Initialize PathManager with predefined include and exclude queries
     PathManager manager(query_includes, query_excludes);
 
+    // Use PathManager to check if the full path is explicitly included in the set E
     bool is_included = manager.isInSet(full_path);
+
+    // If the path is included according to PathManager, read and return the data
     if (is_included) {
         LOG_DEBUG << "PartialGetPlugin::read_data, including full path=" << full_path.c_str();
         al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size);
         return 1;
     }
+    // If the path is not included, skip reading the data and return 0
     LOG_DEBUG << "PartialGetPlugin::read_data, excluding full path=" << full_path.c_str();
     return 0;
 }
