@@ -187,16 +187,9 @@ void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char
     //Checking if the AOS is included
     std::string aos_full_path;
     getAOSPaths(actx, aos_full_path, true);
-    LOG_DEBUG <<  "aos_full_path= " << aos_full_path;
-    LOG_DEBUG <<  "manager.is_included(aos_full_path)= " << manager.is_included(aos_full_path);
+    //LOG_DEBUG <<  "aos_full_path= " << aos_full_path;
+    //LOG_DEBUG <<  "manager.is_included(aos_full_path)= " << manager.is_included(aos_full_path);
     bool is_included = manager.is_included(aos_full_path);
-
-    /*ArraystructContext *parent = actx->getParent();
-    while (parent != NULL) {
-        getAOSPaths(parent, aos_full_path, true);
-        is_included *= manager.is_included(aos_full_path);
-        parent = parent->getParent();
-    }*/
 
     if (!is_included) {
         *arraySize = 0;
@@ -205,19 +198,6 @@ void PartialGetPlugin::begin_arraystruct_action(int ctx, int *aosctx, const char
     else {
         LOG_DEBUG << "PartialGetPlugin::begin_arraystruct_action, all elements included for AOS path=" << aos_full_path.c_str();
     }
-
-
-    //bool is_included = manager.is_included(aos_full_path) || manager.isInSet(aos_full_path);
-
-    /*if (!is_included) {
-        //*arraySize = 0;
-        LOG_DEBUG <<  "manager.is_included(aos_full_path)= " << manager.is_included(aos_full_path);
-        LOG_DEBUG <<  "manager.isInSet(aos_full_path)= " << manager.isInSet(aos_full_path);
-        LOG_DEBUG << "PartialGetPlugin::begin_arraystruct_action, all elements excluded for AOS path=" << aos_full_path.c_str();
-    }
-    else {
-        LOG_DEBUG << "PartialGetPlugin::begin_arraystruct_action, all elements included for AOS path=" << aos_full_path.c_str();
-    }*/
 }
 
 int PartialGetPlugin::read_data(int ctx, const char *fieldPath, const char *timeBasePath,
