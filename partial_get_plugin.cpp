@@ -364,8 +364,8 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                 int i = std::stoi(indices);
                 if (i <= 0) {
                     throw std::runtime_error(includes ? 
-                        "Invalid include query: non-positive index" : 
-                        "Invalid exclude query: non-positive index");
+                        "Invalid include query: Index must be greater than zero" : 
+                        "Invalid exclude query: Index must be greater than zero");
                 }
                 newIndices << i << ":" << i << ":0";
             } catch (const std::invalid_argument&) {
@@ -383,8 +383,8 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
 
                 if (i <= 0 || j <= 0) {
                     throw std::runtime_error(includes ? 
-                        "Invalid include query: non-positive index" : 
-                        "Invalid exclude query: non-positive index");
+                        "Invalid include query: Index must be greater than zero" : 
+                        "Invalid exclude query: Index must be greater than zero");
                 }
                 if (j < i) {
                     throw std::runtime_error(includes ? 
