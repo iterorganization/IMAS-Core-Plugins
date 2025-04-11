@@ -149,8 +149,34 @@ bool PathManager::matchesQuery(const vector<pair<string, int>>& path_elements,
 }
 
 PathManager::PathManager(const vector<string>& inc, const vector<string>& exc) {
-    for (const auto& q : inc) includes.emplace_back(q);
-    for (const auto& q : exc) excludes.emplace_back(q);
+    // Populate includes with all provided include queries, including empty strings as they might be intentional
+    for (const auto& q : inc) {
+        includes.emplace_back(q);
+    }
+
+    // Check if exc contains at least one non-empty string before processing excludes
+    bool has_non_empty_exclude = false;
+    for (const auto& q : exc) {
+        if (!q.empty()) {
+            has_non_empty_exclude = true;
+            break;
+        }
+    }
+
+    // Only populate excludes if there is at least one non-empty string in exc
+    if (has_non_empty_exclude) {
+        for (const auto& q : exc) {
+            // Skip empty strings in exc to ensure excludes only contains meaningful queries
+            if (!q.empty()) {
+                excludes.emplace_back(q);
+            }
+        }
+    } else {
+        // If exc is empty or contains only empty strings, leave excludes empty
+        // This effectively ignores the exc vector in such cases
+    }
+
+    // Build the element cache based on the populated includes and excludes
     buildElementCache();
 }
 
