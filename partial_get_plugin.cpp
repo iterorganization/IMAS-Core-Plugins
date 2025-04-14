@@ -312,6 +312,13 @@ void PartialGetPlugin::splitQueryIntoSubQueries(const std::string &query, std::v
         subqueries.push_back(subquery);
 }
 
+#include <algorithm>
+#include <stdexcept>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <regex>
+
 void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
     // Remove all whitespace from the string
     query.erase(std::remove_if(query.begin(), query.end(), ::isspace), query.end());
@@ -323,144 +330,213 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
 
     // Split the string into subqueries separated by ';'
     std::vector<std::string> subqueries;
-
     splitQueryIntoSubQueries(query, subqueries);
 
     // Function to process a path element
     auto processPathElement = [&includes](const std::string& element) -> std::string {
-        // Regular expression to match different query formats
+        // Regular expression to match different query formats: name or name(indices)
         std::regex queryPattern(R"(^([^(]*)(?:\(([^)]*)\))?$)");
         std::smatch matches;
 
         if (!std::regex_match(element, matches, queryPattern)) {
-            throw std::runtime_error(includes ? 
-                "Invalid include query: incorrect path element format" : 
+            throw std::runtime_error(includes ?
+                "Invalid include query: incorrect path element format" :
                 "Invalid exclude query: incorrect path element format");
         }
 
         std::string name = matches[1].str();
         std::string indices = (matches.size() > 2 && matches[2].matched) ? matches[2].str() : "";
 
-        // Case where there are no indices
+        // Case where there are no indices: name
         if (indices.empty()) {
-            return name;
+            return name; // Return just the name if no parentheses part
         }
 
-        // Normalize formats: (i), (i:j), (i:j:k)
-        std::stringstream newIndices;
-        newIndices << name << "(";
-
-        // Do not modify T(:)
+        // Do not modify T(:) - special case for selecting all elements
         if (indices == ":") {
-            return element;
+            return element; // Return the original element like name(:)
         }
 
-        // Count the number of ':'
+        // Normalize index formats: (i), (i:j), (i:j:k), (:j), (i:), (::k)
+        std::stringstream newIndices;
+        newIndices << name << "("; // Start constructing the normalized string
+
+        // Count the number of ':' characters in the indices part
         int colonCount = std::count(indices.begin(), indices.end(), ':');
 
-        if (colonCount == 0) {
-            // Format (i)
-            try {
+        try {
+            if (colonCount == 0) {
+                // Format: (i) -> normalize to (i:i:0)
                 int i = std::stoi(indices);
                 if (i <= 0) {
-                    throw std::runtime_error(includes ? 
-                        "Invalid include query: Index must be greater than zero" : 
-                        "Invalid exclude query: Index must be greater than zero");
+                    throw std::runtime_error(includes ?
+                        "Invalid include query: Index must be greater than zero for format (i)" :
+                        "Invalid exclude query: Index must be greater than zero for format (i)");
                 }
-                newIndices << i << ":" << i << ":0";
-            } catch (const std::invalid_argument&) {
-                throw std::runtime_error(includes ? 
-                    "Invalid include query: invalid index" : 
-                    "Invalid exclude query: invalid index");
+                newIndices << i << ":" << i << ":0"; // Use 0 for step k as it represents a single element
             }
-        }
-        else if (colonCount == 1) {
-            // Format (i:j)
-            size_t firstColon = indices.find(':');
-            try {
-                int i = std::stoi(indices.substr(0, firstColon));
-                int j = std::stoi(indices.substr(firstColon + 1));
+            else if (colonCount == 1) {
+                // Format can be (i:j), (i:), or (:j)
+                size_t colonPos = indices.find(':');
+                std::string firstPart = indices.substr(0, colonPos);
+                std::string secondPart = indices.substr(colonPos + 1);
 
-                if (i <= 0 || j <= 0) {
-                    throw std::runtime_error(includes ? 
-                        "Invalid include query: Index must be greater than zero" : 
-                        "Invalid exclude query: Index must be greater than zero");
+                if (!firstPart.empty() && !secondPart.empty()) {
+                    // Format: (i:j) -> normalize to (i:j:1)
+                    int i = std::stoi(firstPart);
+                    int j = std::stoi(secondPart);
+
+                    if (i <= 0 || j <= 0) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: Indices must be greater than zero for format (i:j)" :
+                            "Invalid exclude query: Indices must be greater than zero for format (i:j)");
+                    }
+                    if (j < i) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: j must be >= i for format (i:j)" :
+                            "Invalid exclude query: j must be >= i for format (i:j)");
+                    }
+                    newIndices << i << ":" << j << ":1"; // Default step is 1
+                } else if (!firstPart.empty() && secondPart.empty()) {
+                    // Format: (i:) -> normalize to (i:-1:1)
+                    int i = std::stoi(firstPart);
+                    if (i <= 0) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: Index i must be greater than zero for format (i:)" :
+                            "Invalid exclude query: Index i must be greater than zero for format (i:)");
+                    }
+                    newIndices << i << ":-1:1"; // Corrected to match (i:-1:1)
+                } else if (firstPart.empty() && !secondPart.empty()) {
+                    // Format: (:j) -> normalize to (1:j:1)
+                    int j = std::stoi(secondPart);
+                    if (j <= 0) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: Index j must be greater than zero for format (:j)" :
+                            "Invalid exclude query: Index j must be greater than zero for format (:j)");
+                    }
+                    newIndices << "1:" << j << ":1"; // Start from 1, end at j, step 1
+                } else {
+                    // This case (:) should have been caught earlier, but added for completeness
+                    throw std::runtime_error(includes ?
+                        "Invalid include query: unexpected format with one colon" :
+                        "Invalid exclude query: unexpected format with one colon");
                 }
-                if (j < i) {
-                    throw std::runtime_error(includes ? 
-                        "Invalid include query: j must be >= i" : 
-                        "Invalid exclude query: j must be >= i");
-                }
-                newIndices << i << ":" << j << ":1";
-            } catch (const std::invalid_argument&) {
-                throw std::runtime_error(includes ? 
-                    "Invalid include query: invalid index" : 
-                    "Invalid exclude query: invalid index");
             }
-        }
-        else if (colonCount == 2) {
-            // Format (i:j:k)
-            size_t firstColon = indices.find(':');
-            size_t secondColon = indices.find(':', firstColon + 1);
-            try {
-                int i = std::stoi(indices.substr(0, firstColon));
-                int j = std::stoi(indices.substr(firstColon + 1, secondColon - firstColon - 1));
-                int k = std::stoi(indices.substr(secondColon + 1));
+            else if (colonCount == 2) {
+                // Format can be (i:j:k) or (::k)
+                size_t firstColon = indices.find(':');
+                size_t secondColon = indices.find(':', firstColon + 1);
+                std::string i_str = indices.substr(0, firstColon);
+                std::string j_str = indices.substr(firstColon + 1, secondColon - firstColon - 1);
+                std::string k_str = indices.substr(secondColon + 1);
 
-                if (i <= 0 || j <= 0 || k < 0) {
-                    throw std::runtime_error(includes ? 
-                        "Invalid include query: invalid index" : 
-                        "Invalid exclude query: invalid index");
+                if (i_str.empty() && j_str.empty() && !k_str.empty()) {
+                    // Format: (::k) -> normalize to (1:-1:k)
+                    int k = std::stoi(k_str);
+                    if (k < 0) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: Index k must be non-negative for format (::k)" :
+                            "Invalid exclude query: Index k must be non-negative for format (::k)");
+                    }
+                    newIndices << "1:-1:" << k; // Corrected to match (1:-1:k)
                 }
-                if (j < i) {
-                    throw std::runtime_error(includes ? 
-                        "Invalid include query: j must be >= i" : 
-                        "Invalid exclude query: j must be >= i");
+                else if (!i_str.empty() && !j_str.empty() && !k_str.empty()) {
+                    // Format: (i:j:k) -> validate and keep as is
+                    int i = std::stoi(i_str);
+                    int j = std::stoi(j_str);
+                    int k = std::stoi(k_str);
+
+                    // Validate indices according to original logic
+                    if (i <= 0 || j <= 0) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: Indices i and j must be greater than zero for format (i:j:k)" :
+                            "Invalid exclude query: Indices i and j must be greater than zero for format (i:j:k)");
+                    }
+                    if (k < 0) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: Index k must be non-negative for format (i:j:k)" :
+                            "Invalid exclude query: Index k must be non-negative for format (i:j:k)");
+                    }
+                    if (j < i) {
+                        throw std::runtime_error(includes ?
+                            "Invalid include query: j must be >= i for format (i:j:k)" :
+                            "Invalid exclude query: j must be >= i for format (i:j:k)");
+                    }
+                    // Indices are valid, use them directly
+                    newIndices << i << ":" << j << ":" << k;
+                } else {
+                    // Other formats with two colons (e.g., i::k, :j:k) are considered invalid
+                    throw std::runtime_error(includes ?
+                        "Invalid include query: unsupported format with two colons" :
+                        "Invalid exclude query: unsupported format with two colons");
                 }
-                newIndices << i << ":" << j << ":" << k;
-            } catch (const std::invalid_argument&) {
-                throw std::runtime_error(includes ? 
-                    "Invalid include query: invalid index" : 
-                    "Invalid exclude query: invalid index");
             }
+            else {
+                // More than two ':' characters
+                throw std::runtime_error(includes ?
+                    "Invalid include query: incorrect format, too many colons" :
+                    "Invalid exclude query: incorrect format, too many colons");
+            }
+        } catch (const std::invalid_argument& e) {
+            // Catch errors from std::stoi
+            throw std::runtime_error(includes ?
+                "Invalid include query: index is not a valid integer" :
+                "Invalid exclude query: index is not a valid integer");
+        } catch (const std::out_of_range& e) {
+            // Catch errors from std::stoi if number is too large
+            throw std::runtime_error(includes ?
+                "Invalid include query: index is out of range" :
+                "Invalid exclude query: index is out of range");
         }
-        else {
-            // Too many ':' or other format issues
-            throw std::runtime_error(includes ? 
-                "Invalid include query: incorrect format" : 
-                "Invalid exclude query: incorrect format");
+        // Catch the specific runtime_errors thrown above for index validation
+        catch (const std::runtime_error& e) {
+            throw; // Re-throw the specific validation error
         }
 
-        newIndices << ")";
-        return newIndices.str();
+        newIndices << ")"; // Close the parentheses
+        return newIndices.str(); // Return the normalized string e.g., name(i:j:k)
     };
 
     // Process each subquery
-    for (auto& sq : subqueries) {
-        // Split the paths
+    std::vector<std::string> cleanedSubqueries;
+    cleanedSubqueries.reserve(subqueries.size());
+
+    for (const auto& sq : subqueries) {
+        // Split the path into elements separated by '/'
         std::vector<std::string> pathElements;
         std::stringstream pathSs(sq);
         std::string pathElement;
+        std::vector<std::string> processedElements;
 
         while (std::getline(pathSs, pathElement, '/')) {
-            pathElements.push_back(processPathElement(pathElement));
+            if (!pathElement.empty()) { // Handle potential empty strings from consecutive slashes "//"
+                processedElements.push_back(processPathElement(pathElement));
+            } else if (!processedElements.empty()) {
+                // If pathElement is empty BUT we already have elements, it implies "//"
+                // Current behavior: treat "a//b" as "a/b"
+            } else {
+                // Path starts with '/', ignore leading empty element
+            }
         }
 
-        // Reconstruct the path
-        sq = "";
-        for (size_t i = 0; i < pathElements.size(); ++i) {
-            sq += pathElements[i];
-            if (i < pathElements.size() - 1) {
-                sq += "/";
+        // Reconstruct the processed path for the subquery
+        std::string processedSq;
+        for (size_t i = 0; i < processedElements.size(); ++i) {
+            processedSq += processedElements[i];
+            if (i < processedElements.size() - 1) {
+                processedSq += "/";
             }
+        }
+        if (!processedSq.empty()) {
+            cleanedSubqueries.push_back(processedSq);
         }
     }
 
-    // Reconstruct the query string
+    // Reconstruct the final query string from cleaned subqueries
     query = "";
-    for (size_t i = 0; i < subqueries.size(); ++i) {
-        query += subqueries[i];
-        if (i < subqueries.size() - 1) {
+    for (size_t i = 0; i < cleanedSubqueries.size(); ++i) {
+        query += cleanedSubqueries[i];
+        if (i < cleanedSubqueries.size() - 1) {
             query += ";";
         }
     }
