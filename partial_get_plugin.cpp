@@ -334,14 +334,21 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
 
     // Function to process a path element
     auto processPathElement = [&includes](const std::string& element) -> std::string {
+        // Check for invalid separators like '.' within the path element
+        if (element.find('.') != std::string::npos) {
+            throw std::runtime_error(includes ?
+                "Invalid include query: path element contains invalid separator '.' instead of '/'" :
+                "Invalid exclude query: path element contains invalid separator '.' instead of '/'");
+        }
+
         // Regular expression to match different query formats: name or name(indices)
         std::regex queryPattern(R"(^([^(]*)(?:\(([^)]*)\))?$)");
         std::smatch matches;
 
         if (!std::regex_match(element, matches, queryPattern)) {
             throw std::runtime_error(includes ?
-                "Invalid include query: incorrect path element format" :
-                "Invalid exclude query: incorrect path element format");
+                "Invalid include query: path element has incorrect format (expected 'name' or 'name(indices)')" :
+                "Invalid exclude query: path element has incorrect format (expected 'name' or 'name(indices)')");
         }
 
         std::string name = matches[1].str();
@@ -502,6 +509,13 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
     cleanedSubqueries.reserve(subqueries.size());
 
     for (const auto& sq : subqueries) {
+        // Check for invalid separators like '.' used between path elements
+        if (sq.find('.') != std::string::npos) {
+            throw std::runtime_error(includes ?
+                "Invalid include query: subquery contains invalid separator '.' instead of '/'" :
+                "Invalid exclude query: subquery contains invalid separator '.' instead of '/'");
+        }
+
         // Split the path into elements separated by '/'
         std::vector<std::string> pathElements;
         std::stringstream pathSs(sq);
