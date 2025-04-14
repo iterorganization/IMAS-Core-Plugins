@@ -70,10 +70,24 @@ vector<PathElement> PathQuery::parsePath(const string& path_str) {
                 elements.emplace_back(name, true, new StructureArray(name, 0, 0, 1, true));
             } else {
                 vector<int> indices;
-                stringstream iss(indices_str);
-                string num;
-                while (getline(iss, num, ':')) {
-                    indices.push_back(stoi(num));
+                //size_t pos = 0;
+                size_t colon_pos = indices_str.find(':');
+                if (colon_pos == string::npos) {
+                    // Single index, e.g., "density(1)"
+                    indices.push_back(stoi(indices_str));
+                } else {
+                    // Range, e.g., "density(1:5)" or "density(1:5:1)"
+                    indices.push_back(stoi(indices_str.substr(0, colon_pos)));
+                    size_t second_colon_pos = indices_str.find(':', colon_pos + 1);
+                    if (second_colon_pos == string::npos) {
+                        // Format "start:end"
+                        indices.push_back(stoi(indices_str.substr(colon_pos + 1)));
+                        indices.push_back(1); // Default step
+                    } else {
+                        // Format "start:end:step"
+                        indices.push_back(stoi(indices_str.substr(colon_pos + 1, second_colon_pos - colon_pos - 1)));
+                        indices.push_back(stoi(indices_str.substr(second_colon_pos + 1)));
+                    }
                 }
                 if (indices.size() == 1) {
                     elements.emplace_back(name, true, new StructureArray(name, indices[0], indices[0], 0));
@@ -149,9 +163,15 @@ bool PathManager::matchesQuery(const vector<pair<string, int>>& path_elements,
 }
 
 PathManager::PathManager(const vector<string>& inc, const vector<string>& exc) {
-    // Populate includes with all provided include queries, including empty strings as they might be intentional
+    // Split each include query by ';' and create a PathQuery for each sub-query
     for (const auto& q : inc) {
-        includes.emplace_back(q);
+        stringstream ss(q);
+        string sub_query;
+        while (getline(ss, sub_query, ';')) {
+            if (!sub_query.empty()) { // Ignore empty sub-queries
+                includes.emplace_back(sub_query);
+            }
+        }
     }
 
     // Check if exc contains at least one non-empty string before processing excludes
@@ -166,14 +186,15 @@ PathManager::PathManager(const vector<string>& inc, const vector<string>& exc) {
     // Only populate excludes if there is at least one non-empty string in exc
     if (has_non_empty_exclude) {
         for (const auto& q : exc) {
-            // Skip empty strings in exc to ensure excludes only contains meaningful queries
-            if (!q.empty()) {
-                excludes.emplace_back(q);
+            // Split each exclude query by ';' and create a PathQuery for each sub-query
+            stringstream ss(q);
+            string sub_query;
+            while (getline(ss, sub_query, ';')) {
+                if (!sub_query.empty()) { // Skip empty sub-queries
+                    excludes.emplace_back(sub_query);
+                }
             }
         }
-    } else {
-        // If exc is empty or contains only empty strings, leave excludes empty
-        // This effectively ignores the exc vector in such cases
     }
 
     // Build the element cache based on the populated includes and excludes
@@ -193,8 +214,9 @@ bool PathManager::isInSet(const string& path) const {
     }
 
     for (const auto& include : includes) {
+        // Check if path matches the include query exactly or as a prefix
+        bool match = true;
         if (path_elements.size() <= include.elements.size()) {
-            bool match = true;
             for (size_t i = 0; i < path_elements.size(); ++i) {
                 const auto& path_elem = path_elements[i];
                 const auto& query_elem = include.elements[i];
@@ -226,7 +248,8 @@ bool PathManager::isInSet(const string& path) const {
                 return true;
             }
         }
-        else {
+        // Check if path is an extension of the include query
+        if (path_elements.size() > include.elements.size()) {
             bool prefix_match = true;
             for (size_t i = 0; i < include.elements.size(); ++i) {
                 const auto& path_elem = path_elements[i];
@@ -363,10 +386,8 @@ bool PathManager::is_included(const string& array_path) const {
         }
         // Case 3: target_array is an intermediate array or an extension in include
         else {
-            //bool found_target = false;
             for (size_t i = 0; i < include.elements.size(); ++i) {
                 if (include.elements[i].name == target_array && include.elements[i].is_array) {
-                    //found_target = true;
                     if (prefix_elements.size() == i) {
                         bool prefix_match = true;
                         for (size_t j = 0; j < prefix_elements.size(); ++j) {
@@ -458,7 +479,7 @@ bool PathManager::is_included(const string& array_path) const {
                         break;
                     }
                 }
-                if (prefix_match) {
+                if (prefix_match) { 
                     string prefix_path;
                     for (size_t i = 0; i < prefix_elements.size(); ++i) {
                         if (i > 0) prefix_path += "/";
