@@ -231,6 +231,7 @@ int PartialGetPlugin::read_data(int ctx, const char *fieldPath, const char *time
         al_plugin_read_data(ctx, fieldPath, timeBasePath, data, datatype, dim, size);
         return 1;
     }
+    
     // If the path is not included, skip reading the data and return 0
     LOG_DEBUG << "PartialGetPlugin::read_data, excluding full path=" << full_path.c_str();
     return 0;
@@ -336,7 +337,7 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
     auto processPathElement = [&includes](const std::string& element) -> std::string {
         // Check for invalid separators like '.' within the path element
         if (element.find('.') != std::string::npos) {
-            throw std::runtime_error(includes ?
+            throw ALPluginException(includes ?
                 "Invalid include query: path element contains invalid separator '.' instead of '/'" :
                 "Invalid exclude query: path element contains invalid separator '.' instead of '/'");
         }
@@ -346,7 +347,7 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
         std::smatch matches;
 
         if (!std::regex_match(element, matches, queryPattern)) {
-            throw std::runtime_error(includes ?
+            throw ALPluginException(includes ?
                 "Invalid include query: path element has incorrect format (expected 'name' or 'name(indices)')" :
                 "Invalid exclude query: path element has incorrect format (expected 'name' or 'name(indices)')");
         }
@@ -376,7 +377,7 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                 // Format: (i) -> normalize to (i:i:0)
                 int i = std::stoi(indices);
                 if (i <= 0) {
-                    throw std::runtime_error(includes ?
+                    throw ALPluginException(includes ?
                         "Invalid include query: Index must be greater than zero for format (i)" :
                         "Invalid exclude query: Index must be greater than zero for format (i)");
                 }
@@ -394,12 +395,12 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     int j = std::stoi(secondPart);
 
                     if (i <= 0 || j <= 0) {
-                        throw std::runtime_error(includes ?
+                        throw ALPluginException(includes ?
                             "Invalid include query: Indices must be greater than zero for format (i:j)" :
                             "Invalid exclude query: Indices must be greater than zero for format (i:j)");
                     }
                     if (j < i) {
-                        throw std::runtime_error(includes ?
+                        throw ALPluginException(includes ?
                             "Invalid include query: j must be >= i for format (i:j)" :
                             "Invalid exclude query: j must be >= i for format (i:j)");
                     }
@@ -408,7 +409,7 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     // Format: (i:) -> normalize to (i:-1:1)
                     int i = std::stoi(firstPart);
                     if (i <= 0) {
-                        throw std::runtime_error(includes ?
+                        throw ALPluginException(includes ?
                             "Invalid include query: Index i must be greater than zero for format (i:)" :
                             "Invalid exclude query: Index i must be greater than zero for format (i:)");
                     }
@@ -417,14 +418,14 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     // Format: (:j) -> normalize to (1:j:1)
                     int j = std::stoi(secondPart);
                     if (j <= 0) {
-                        throw std::runtime_error(includes ?
+                        throw ALPluginException(includes ?
                             "Invalid include query: Index j must be greater than zero for format (:j)" :
                             "Invalid exclude query: Index j must be greater than zero for format (:j)");
                     }
                     newIndices << "1:" << j << ":1"; // Start from 1, end at j, step 1
                 } else {
                     // This case (:) should have been caught earlier, but added for completeness
-                    throw std::runtime_error(includes ?
+                    throw ALPluginException(includes ?
                         "Invalid include query: unexpected format with one colon" :
                         "Invalid exclude query: unexpected format with one colon");
                 }
@@ -441,9 +442,9 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     // Format: (::k) -> normalize to (1:-1:k)
                     int k = std::stoi(k_str);
                     if (k < 0) {
-                        throw std::runtime_error(includes ?
-                            "Invalid include query: Index k must be non-negative for format (::k)" :
-                            "Invalid exclude query: Index k must be non-negative for format (::k)");
+                        throw ALPluginException(includes ?
+                            "Invalid include query: Index k must be greater than zero for format (::k)" :
+                            "Invalid exclude query: Index k must be greater than zero for format (::k)");
                     }
                     newIndices << "1:-1:" << k; // Corrected to match (1:-1:k)
                 }
@@ -455,17 +456,17 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
 
                     // Validate indices according to original logic
                     if (i <= 0 || j <= 0) {
-                        throw std::runtime_error(includes ?
+                        throw ALPluginException(includes ?
                             "Invalid include query: Indices i and j must be greater than zero for format (i:j:k)" :
                             "Invalid exclude query: Indices i and j must be greater than zero for format (i:j:k)");
                     }
                     if (k < 0) {
-                        throw std::runtime_error(includes ?
-                            "Invalid include query: Index k must be non-negative for format (i:j:k)" :
-                            "Invalid exclude query: Index k must be non-negative for format (i:j:k)");
+                        throw ALPluginException(includes ?
+                            "Invalid include query: Index k must be greater than zero for format (i:j:k)" :
+                            "Invalid exclude query: Index k must be greater than zero for format (i:j:k)");
                     }
                     if (j < i) {
-                        throw std::runtime_error(includes ?
+                        throw ALPluginException(includes ?
                             "Invalid include query: j must be >= i for format (i:j:k)" :
                             "Invalid exclude query: j must be >= i for format (i:j:k)");
                     }
@@ -473,30 +474,30 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     newIndices << i << ":" << j << ":" << k;
                 } else {
                     // Other formats with two colons (e.g., i::k, :j:k) are considered invalid
-                    throw std::runtime_error(includes ?
+                    throw ALPluginException(includes ?
                         "Invalid include query: unsupported format with two colons" :
                         "Invalid exclude query: unsupported format with two colons");
                 }
             }
             else {
                 // More than two ':' characters
-                throw std::runtime_error(includes ?
+                throw ALPluginException(includes ?
                     "Invalid include query: incorrect format, too many colons" :
                     "Invalid exclude query: incorrect format, too many colons");
             }
         } catch (const std::invalid_argument& e) {
             // Catch errors from std::stoi
-            throw std::runtime_error(includes ?
+            throw ALPluginException(includes ?
                 "Invalid include query: index is not a valid integer" :
                 "Invalid exclude query: index is not a valid integer");
         } catch (const std::out_of_range& e) {
             // Catch errors from std::stoi if number is too large
-            throw std::runtime_error(includes ?
+            throw ALPluginException(includes ?
                 "Invalid include query: index is out of range" :
                 "Invalid exclude query: index is out of range");
         }
         // Catch the specific runtime_errors thrown above for index validation
-        catch (const std::runtime_error& e) {
+        catch (const ALPluginException& e) {
             throw; // Re-throw the specific validation error
         }
 
@@ -511,7 +512,7 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
     for (const auto& sq : subqueries) {
         // Check for invalid separators like '.' used between path elements
         if (sq.find('.') != std::string::npos) {
-            throw std::runtime_error(includes ?
+            throw ALPluginException(includes ?
                 "Invalid include query: subquery contains invalid separator '.' instead of '/'" :
                 "Invalid exclude query: subquery contains invalid separator '.' instead of '/'");
         }
