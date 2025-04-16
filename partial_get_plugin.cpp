@@ -378,8 +378,8 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                 int i = std::stoi(indices);
                 if (i <= 0) {
                     throw ALPluginException(includes ?
-                        "Invalid include query: Index must be greater than zero for format (i)" :
-                        "Invalid exclude query: Index must be greater than zero for format (i)");
+                        "Invalid include query: Index i must be greater than zero for format (i)" :
+                        "Invalid exclude query: Index i must be greater than zero for format (i)");
                 }
                 newIndices << i << ":" << i << ":0"; // Use 0 for step k as it represents a single element
             }
@@ -396,13 +396,13 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
 
                     if (i <= 0 || j <= 0) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: Indices must be greater than zero for format (i:j)" :
-                            "Invalid exclude query: Indices must be greater than zero for format (i:j)");
+                            "Invalid include query: Indices must be greater than zero for format (start:stop)" :
+                            "Invalid exclude query: Indices must be greater than zero for format (start:stop)");
                     }
                     if (j < i) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: j must be >= i for format (i:j)" :
-                            "Invalid exclude query: j must be >= i for format (i:j)");
+                            "Invalid include query: stop must be >= start for format (start:stop)" :
+                            "Invalid exclude query: stop must be >= start for format (start:stop)");
                     }
                     newIndices << i << ":" << j << ":1"; // Default step is 1
                 } else if (!firstPart.empty() && secondPart.empty()) {
@@ -410,8 +410,8 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     int i = std::stoi(firstPart);
                     if (i <= 0) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: Index i must be greater than zero for format (i:)" :
-                            "Invalid exclude query: Index i must be greater than zero for format (i:)");
+                            "Invalid include query: Index start must be greater than zero for format (start:)" :
+                            "Invalid exclude query: Index start must be greater than zero for format (start:)");
                     }
                     newIndices << i << ":-1:1"; // Corrected to match (i:-1:1)
                 } else if (firstPart.empty() && !secondPart.empty()) {
@@ -419,8 +419,8 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     int j = std::stoi(secondPart);
                     if (j <= 0) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: Index j must be greater than zero for format (:j)" :
-                            "Invalid exclude query: Index j must be greater than zero for format (:j)");
+                            "Invalid include query: Index stop must be greater than zero for format (:stop)" :
+                            "Invalid exclude query: Index stop must be greater than zero for format (:stop)");
                     }
                     newIndices << "1:" << j << ":1"; // Start from 1, end at j, step 1
                 } else {
@@ -443,8 +443,8 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     int k = std::stoi(k_str);
                     if (k < 0) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: Index k must be greater than zero for format (::k)" :
-                            "Invalid exclude query: Index k must be greater than zero for format (::k)");
+                            "Invalid include query: Index step must be positive or zero for format (::step)" :
+                            "Invalid exclude query: Index step must be positive or zero for format (::step)");
                     }
                     newIndices << "1:-1:" << k; // Corrected to match (1:-1:k)
                 }
@@ -457,18 +457,18 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
                     // Validate indices according to original logic
                     if (i <= 0 || j <= 0) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: Indices i and j must be greater than zero for format (i:j:k)" :
-                            "Invalid exclude query: Indices i and j must be greater than zero for format (i:j:k)");
+                            "Invalid include query: Indices start and stop must be greater than zero for format (start:stop:step)" :
+                            "Invalid exclude query: Indices start and stop must be greater than zero for format (start:stop:step)");
                     }
                     if (k < 0) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: Index k must be greater than zero for format (i:j:k)" :
-                            "Invalid exclude query: Index k must be greater than zero for format (i:j:k)");
+                            "Invalid include query: Index step must be positive or zero for format (start:stop:step)" :
+                            "Invalid exclude query: Index step must be positive or zero for format (start:stop:step)");
                     }
                     if (j < i) {
                         throw ALPluginException(includes ?
-                            "Invalid include query: j must be >= i for format (i:j:k)" :
-                            "Invalid exclude query: j must be >= i for format (i:j:k)");
+                            "Invalid include query: stop must be >= start for format (start:stop:step)" :
+                            "Invalid exclude query: stop must be >= start for format (start:stop:step)");
                     }
                     // Indices are valid, use them directly
                     newIndices << i << ":" << j << ":" << k;
