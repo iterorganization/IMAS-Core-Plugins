@@ -491,10 +491,10 @@ bool PathManager::is_included(const string& array_path) const {
                     break; // Stop searching once target_array is found
                 }
             }
-            // Case 4: target_array is an extension beyond include
-            if (prefix_elements.size() == include.elements.size()) {
+            // Case 4: array_path is an extension of include with specified indices
+            if (prefix_elements.size() >= include.elements.size()) {
                 bool prefix_match = true;
-                for (size_t i = 0; i < prefix_elements.size(); ++i) {
+                for (size_t i = 0; i < include.elements.size(); ++i) {
                     const auto& path_elem = prefix_elements[i];
                     const auto& query_elem = include.elements[i];
                     if (path_elem.first != query_elem.name) {
@@ -522,7 +522,7 @@ bool PathManager::is_included(const string& array_path) const {
                             prefix_path += prefix_elements[i].first;
                         }
                     }
-                    if (isInSet(prefix_path)) {
+                    if (isInSet(prefix_path + "/" + target_array)) {
                         return true;
                     }
                 }
