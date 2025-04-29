@@ -313,13 +313,6 @@ void PartialGetPlugin::splitQueryIntoSubQueries(const std::string &query, std::v
         subqueries.push_back(subquery);
 }
 
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <regex>
-
 void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
     // Remove all whitespace from the string
     query.erase(std::remove_if(query.begin(), query.end(), ::isspace), query.end());
@@ -355,9 +348,16 @@ void PartialGetPlugin::cleanQueries(std::string &query, bool includes) {
         std::string name = matches[1].str();
         std::string indices = (matches.size() > 2 && matches[2].matched) ? matches[2].str() : "";
 
-        // Case where there are no indices: name
+        // Case where there are no parentheses: return just the name
+        if (!matches[2].matched) {
+            return name;
+        }
+
+        // Case where parentheses are present but empty: throw an exception
         if (indices.empty()) {
-            return name; // Return just the name if no parentheses part
+            throw ALPluginException(includes ?
+                "Invalid include query: empty content in parentheses is not allowed" :
+                "Invalid exclude query: empty content in parentheses is not allowed");
         }
 
         // Do not modify T(:) - special case for selecting all elements
