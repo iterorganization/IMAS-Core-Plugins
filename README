@@ -87,28 +87,8 @@ Or using Python:
 
 python test_debug_plugin.py imas:hdf5?path=$WEST_PULSE_FILES/54914/0/
 
-2. TESTING THE PATCH_READER PLUGIN
 
-This plugin is described in the PDF file. It will create a new pulse file.
-
-Using C++, the following command:
-
-./test_patch_reader_plugin imas:hdf5?path=$MY_PULSE_FILES/55000/0
-
-will execute the 'test_patch_reader_plugin' for pulse 55000 whose the 'master.h5' file is located in directory $MY_PULSE_FILES/55000/0.
-
-This will call the 'patch_reader' plugin, creating the pulse file for pulse 55000 at the specified path.
-
-Or using Fortran:
-
-./test_fortran_patch_reader_plugin imas:hdf5?path=$MY_PULSE_FILES/55000/0
-
-Or using Python:
-
-python test_patch_reader_plugin.py imas:hdf5?path=$MY_PULSE_FILES/55000/0
-
-
-3. TESTING THE PARTIAL_GET PLUGIN
+2. TESTING THE PARTIAL_GET PLUGIN
 
 This plugin is described in the PDF file. It can be executed on an existing pulse file.
 
@@ -129,7 +109,7 @@ Or using Python:
 python test_partial_get_plugin.py imas:hdf5?path=$WEST_PULSE_FILES/54914/0/
 
  
-4. TESTING THE CREATION_DATE PLUGIN
+3. TESTING THE CREATION_DATE PLUGIN
 
 This plugin is described in the PDF file. It will create a new pulse file.
 

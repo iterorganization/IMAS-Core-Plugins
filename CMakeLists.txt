@@ -55,11 +55,6 @@ add_library( al-partial-get-plugin SHARED partial_get_plugin.cpp path_manager.cp
 set_target_properties( al-partial-get-plugin PROPERTIES PREFIX "" OUTPUT_NAME partial_get_plugin )
 target_link_libraries( al-partial-get-plugin al-plugin-simple-logger al )
 
-# patch reader plugin
-add_library( al-patch-reader-plugin SHARED patch_reader_plugin.cpp )
-set_target_properties( al-patch-reader-plugin PROPERTIES PREFIX "" OUTPUT_NAME patch_reader_plugin )
-target_link_libraries( al-patch-reader-plugin al-plugin-simple-logger al-plugin-reader-helper al )
-
 # Custom target that depends on all plugin library targets  
 add_custom_target( al-plugins DEPENDS
   al-debug-plugin
@@ -67,5 +62,4 @@ add_custom_target( al-plugins DEPENDS
   al-creation-date-plugin
   al-parameter-plugin
   al-partial-get-plugin
-  al-patch-reader-plugin
 )
